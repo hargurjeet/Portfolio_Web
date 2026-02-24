@@ -17,7 +17,19 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000 &
 FASTAPI_PID=$!
 
 # Wait for FastAPI to be ready
-sleep 5
+echo "Waiting for FastAPI to be ready..."
+MAX_WAIT=120
+WAITED=0
+until curl -sf http://localhost:8000/health > /dev/null 2>&1; do
+    if [ $WAITED -ge $MAX_WAIT ]; then
+        echo "FastAPI did not start within ${MAX_WAIT}s, exiting"
+        kill $FASTAPI_PID 2>/dev/null
+        exit 1
+    fi
+    sleep 2
+    WAITED=$((WAITED + 2))
+done
+echo "FastAPI is ready after ${WAITED}s"
 
 # Start Streamlit on port 7860 (only port HF Spaces exposes)
 echo "Starting Streamlit..."
