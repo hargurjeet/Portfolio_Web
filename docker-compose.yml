@@ -1,13 +1,18 @@
 version: '3.8'
 
+# ── FOR LOCAL DEVELOPMENT ONLY ─────────────────────────────────────────────────
+# For Hugging Face Spaces deployment, use Dockerfile + start.sh directly.
+# HF Spaces only exposes port 7860 so docker-compose is not used there.
+
 services:
   portfolio-chatbot:
     build: .
     ports:
-      - "8000:8000"
-      - "8501:8501"
+      - "7860:7860"   # Streamlit (matches HF Spaces port for consistency)
+      - "8000:8000"   # FastAPI (internal, exposed locally for debugging)
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
-      - ./data:/app/data
-      - ./faiss_index:/app/faiss_index
+      - ./data:/app/data             # mount docs so index can be built
+      - ./faiss_index:/app/faiss_index  # persist index between restarts
+    restart: unless-stopped

@@ -4,7 +4,7 @@ import base64
 import json
 import os
 
-API_URL = "http://localhost:8000/api/v1/chat"
+API_URL = os.getenv("API_URL", "http://localhost:8000/api/v1/chat")
 RESUME_PATH = "data/Hargurjeet_Lead_GenAI_Specialist.pdf"
 
 st.set_page_config(
