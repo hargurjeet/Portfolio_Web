@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Make startup script executable
+COPY start.sh .
 RUN chmod +x start.sh
 
 # HF Spaces only exposes port 7860
