@@ -245,7 +245,7 @@ with st.sidebar:
     st.markdown("""
     <div style="padding: 0 4px;">
         <div style="font-size: 11px; color: #555; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600;">Connect</div>
-        <a href="https://linkedin.com" target="_blank" style="
+        <a href="https://www.linkedin.com/in/hargurjeet/" target="_blank" style="
             display: flex; align-items: center; gap: 10px;
             color: #aaa; text-decoration: none; font-size: 14px;
             padding: 8px 10px; border-radius: 8px;
@@ -254,7 +254,7 @@ with st.sidebar:
         " onmouseover="this.style.background='#222'" onmouseout="this.style.background='transparent'">
             🔗 &nbsp;LinkedIn
         </a>
-        <a href="https://github.com" target="_blank" style="
+        <a href="https://github.com/hargurjeet" target="_blank" style="
             display: flex; align-items: center; gap: 10px;
             color: #aaa; text-decoration: none; font-size: 14px;
             padding: 8px 10px; border-radius: 8px;
@@ -262,7 +262,7 @@ with st.sidebar:
         " onmouseover="this.style.background='#222'" onmouseout="this.style.background='transparent'">
             🐙 &nbsp;GitHub
         </a>
-        <a href="mailto:hargurjeet@example.com" style="
+        <a href="mailto:gurjeet333@gmail.com" style="
             display: flex; align-items: center; gap: 10px;
             color: #aaa; text-decoration: none; font-size: 14px;
             padding: 8px 10px; border-radius: 8px;
@@ -502,37 +502,198 @@ with blogs_tab:
     # ── Blog data — update this list with your real posts ──
     BLOGS = [
         {
-            "title": "Building a Production-Ready RAG Pipeline with LangChain and FAISS",
-            "platform": "Medium",
-            "url": "https://medium.com",
+            "title": "Stop Writing Buggy APIs: Why Pydantic Should Be Your New Best Friend",
+            "platform": "LinkedIn",
+            "url": "https://www.linkedin.com/pulse/stop-writing-buggy-apis-why-pydantic-should-your-new-best-ganger-vpcpc/?trackingId=lzRLeNiCTYaVpRzDr6fB0A%3D%3D",
             "thumbnail": "https://miro.medium.com/v2/resize:fit:1200/1*placeholder.png",
             "emoji": "🔗",
         },
         {
-            "title": "From Zero to GenAI: How I Built an LLM Evaluation Framework",
+            "title": "From Videos to Blogs: Unlock Content Creation with Crewai",
             "platform": "Medium",
-            "url": "https://medium.com",
+            "url": "https://gurjeet333.medium.com/from-videos-to-blogs-unlock-content-creation-with-crewai-774f1bc083bf",
+            "thumbnail": "https://miro.medium.com/v2/resize:fit:1200/1*placeholder.png",
+            "emoji": "🔗",
+        },
+        {
+            "title": "Mastering AI Agents: A Journey from Basics to Execution",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/mastering-ai-agents-a-journey-from-basics-to-execution-3ec35c6aa93c",
             "thumbnail": "",
             "emoji": "🧠",
         },
         {
-            "title": "Why Agentic AI is the Next Frontier for Enterprise Automation",
-            "platform": "LinkedIn",
-            "url": "https://linkedin.com",
+            "title": "Time Series Forecasting Using AUTO ARIMA + PROPHET + LightGBM",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/time-series-forecasting-using-auto-arima-prophet-lightgbm-6362ef486c95",
             "thumbnail": "",
             "emoji": "🤖",
         },
         {
-            "title": "Lessons from Deploying ML Models on AWS at Scale",
+            "title": "Machine Learning with Python: Implementing XGBoost and Random Forest",
             "platform": "Medium",
-            "url": "https://medium.com",
+            "url": "https://gurjeet333.medium.com/machine-learning-with-python-implementing-xgboost-and-random-forest-fd51fa4f9f4c",
             "thumbnail": "",
             "emoji": "☁️",
         },
         {
-            "title": "XGBoost vs Random Forest: Which One for Your Use Case?",
-            "platform": "LinkedIn",
-            "url": "https://linkedin.com",
+            "title": "Learn how to build an advanced chatbot with a cloud vector database",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/learn-how-to-build-a-chatbot-from-scratch-on-a-free-cloud-vector-database-193a7fa29c13",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Performing Sentence Similarity By Leveraging Hugging Face APIs",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/performing-sentence-similarity-by-leveraging-hugging-face-apis-8ca0846e299c",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Working with SQL in Python Environment?",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/working-with-sql-in-python-environment-917385774583",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Best Known Techniques For Data Scientist To Handle Missing/Null Values In Any Tabular Dataset",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/best-known-techniques-for-data-scientist-to-handle-missing-null-values-in-any-tabular-dataset-3a9f71c9486",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Sentiment Analysis of Movie Reviews with Google’s BERT",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/sentiment-analysis-of-movie-reviews-with-googles-bert-c2b97f4217f",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Understanding Machine Learning Pipeline — A Gentle Introduction",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/understanding-machine-learning-pipeline-a-gentle-introduction-ca96419108dc",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Learning k-folds Cross Validations",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/learning-k-folds-cross-validations-69b981c91e3a",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Building Recommendations System? A Beginner Guide",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/building-recommendations-system-a-beginner-guide-8593f205bc0a",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "What Should I Read Next? Books Recommendation",
+            "platform": "Medium",
+            "url": "https://medium.com/nerd-for-tech/what-should-i-read-next-books-recommendation-311666254817",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "NLP — Detecting Fake News On Social Media",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/nlp-detecting-fake-news-on-social-media-aa53ff74f2ff",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Fake or Not ? Twitter Disaster Tweets",
+            "platform": "Medium",
+            "url": "https://medium.com/geekculture/fake-or-not-twitter-disaster-tweets-f1a6b2311be9",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Fake or Not ? Twitter Disaster Tweets",
+            "platform": "Medium",
+            "url": "https://medium.com/geekculture/fake-or-not-twitter-disaster-tweets-f1a6b2311be9",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "PyTorch — Training Fruit 360 Classifier Under 5 mins",
+            "platform": "Medium",
+            "url": "https://medium.com/geekculture/pytorch-training-fruit-360-classifier-under-5-mins-23153b46ec88",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "7 Best Techniques To Improve The Accuracy of CNN W/O Overfitting",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/7-best-techniques-to-improve-the-accuracy-of-cnn-w-o-overfitting-6db06467182f",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Training Convolutional Neural Network(ConvNet/CNN) on GPU From Scratch",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/training-convolutional-neural-network-convnet-cnn-on-gpu-from-scratch-439e9fdc13a5",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Training Feed Forward Neural Network(FFNN) on GPU — Beginners Guide",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/training-feed-forward-neural-network-ffnn-on-gpu-beginners-guide-2d04254deca9",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Logistic Regression With PyTorch — A Beginner Guide",
+            "platform": "Medium",
+            "url": "https://medium.com/analytics-vidhya/logistic-regression-with-pytorch-a-beginner-guide-33c2266ad129",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Getting Started With Machine Learning — Swedish Auto Insurance Dataset",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/getting-started-with-machine-learning-swedish-auto-insurance-dataset-e3583267d0ee",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Explanatory Data Analysis With Python -Beginners Guide",
+            "platform": "Medium",
+            "url": "https://medium.com/geekculture/covid-19-explanatory-data-analysis-76cab46c48d1",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Exploratory Data Analysis of Zomato’s Restaurant Dataset",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/explanatory-data-analysis-of-zomato-restaurant-data-71ba8c3c7e5e",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Deep Learning for Beginners Using TensorFlow",
+            "platform": "Medium",
+            "url": "https://medium.com/analytics-vidhya/cnn-german-traffic-signal-recognition-benchmarking-using-tensorflow-accuracy-80-d069b7996082",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "CNN Model for Gender and Ethnicity Prediction with Tensorflow",
+            "platform": "Medium",
+            "url": "https://gurjeet333.medium.com/cnn-model-for-gender-and-ethnicity-prediction-with-tensorflow-ffbbaa4efdad",
+            "thumbnail": "",
+            "emoji": "📊",
+        },
+        {
+            "title": "Data Exploration of historical Olympics dataset",
+            "platform": "Medium",
+            "url": "https://medium.com/nerd-for-tech/data-exploration-of-historical-olympics-dataset-2d50a7d0611d",
             "thumbnail": "",
             "emoji": "📊",
         },
