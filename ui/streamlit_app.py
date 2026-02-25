@@ -463,7 +463,8 @@ with resume_tab:
         with open(RESUME_PATH, "rb") as f:
             pdf_bytes = f.read()
 
-        # Show download button first
+        b64 = base64.b64encode(pdf_bytes).decode("utf-8")
+
         st.download_button(
             label="⬇️  Download Resume",
             data=pdf_bytes,
@@ -471,25 +472,26 @@ with resume_tab:
             mime="application/pdf"
         )
 
-        # Use Streamlit's native PDF viewer — works in all browsers including Chrome
-        st.markdown("""
-        <div style="margin-top: 12px; border-radius: 12px; overflow: hidden;">
-        """, unsafe_allow_html=True)
-        # Display PDF via object tag which Chrome allows (unlike data: iframes)
-        b64 = base64.b64encode(pdf_bytes).decode("utf-8")
-        st.markdown(f"""
-            <object
-                data="data:application/pdf;base64,{b64}"
-                type="application/pdf"
-                width="100%"
-                height="900px"
-                style="border: none; border-radius: 12px;">
-                <p style="color:#888; padding: 20px;">
-                    Your browser cannot display the PDF inline.
-                    Please use the download button above to view it.
-                </p>
-            </object>
-        """, unsafe_allow_html=True)
+        import streamlit.components.v1 as components
+        components.html(f"""
+            <script>
+                const b64 = "{b64}";
+                const binary = atob(b64);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {{
+                    bytes[i] = binary.charCodeAt(i);
+                }}
+                const blob = new Blob([bytes], {{type: 'application/pdf'}});
+                const url = URL.createObjectURL(blob);
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                iframe.width = '100%';
+                iframe.height = '860px';
+                iframe.style.border = 'none';
+                iframe.style.borderRadius = '12px';
+                document.body.appendChild(iframe);
+            </script>
+        """, height=880)
     else:
         st.error(f"⚠️ Resume not found at `{RESUME_PATH}`.")
 
