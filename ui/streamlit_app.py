@@ -4,7 +4,6 @@ import base64
 import json
 import os
 
-import os
 API_URL = os.getenv("API_URL", "http://localhost:8000/api/v1/chat")
 RESUME_PATH = "data/Hargurjeet_Lead_GenAI_Specialist.pdf"
 
@@ -15,225 +14,251 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Force sidebar open on every rerun
 if "sidebar_state" not in st.session_state:
     st.session_state.sidebar_state = "expanded"
 
+# ── THEME STATE ────────────────────────────────────────────────────────────────
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = True
+
+dark = st.session_state.dark_mode
+
+# ── THEME VARIABLES ────────────────────────────────────────────────────────────
+if dark:
+    bg          = "#0f0f0f"
+    sidebar_bg  = "#141414"
+    card_bg     = "#1a1a1a"
+    card_border = "#252525"
+    text_main   = "#f0f0f0"
+    text_body   = "#e0e0e0"
+    text_muted  = "#888888"
+    text_dim    = "#555555"
+    input_bg    = "#1a1a1a"
+    input_bdr   = "#333333"
+    hr_color    = "#222222"
+    hover_bg    = "#222222"
+    tab_bg      = "#1a1a1a"
+    tab_border  = "#2a2a2a"
+    expander_bg = "#161616"
+    tag_bg      = "#252525"
+    tag_color   = "#888888"
+    blog_bg     = "#141414"
+    blog_bdr    = "#222222"
+    project_bg  = "#141414"
+    toggle_icon = "☀️"
+    toggle_lbl  = "Light Mode"
+    scrollbar_track = "#0f0f0f"
+    scrollbar_thumb = "#333333"
+else:
+    bg          = "#f5f5f0"
+    sidebar_bg  = "#ffffff"
+    card_bg     = "#ffffff"
+    card_border = "#e0e0e0"
+    text_main   = "#1a1a1a"
+    text_body   = "#2a2a2a"
+    text_muted  = "#666666"
+    text_dim    = "#999999"
+    input_bg    = "#ffffff"
+    input_bdr   = "#d0d0d0"
+    hr_color    = "#e8e8e8"
+    hover_bg    = "#f0f0f0"
+    tab_bg      = "#ececec"
+    tab_border  = "#d8d8d8"
+    expander_bg = "#f9f9f9"
+    tag_bg      = "#eeeeee"
+    tag_color   = "#555555"
+    blog_bg     = "#ffffff"
+    blog_bdr    = "#e0e0e0"
+    project_bg  = "#ffffff"
+    toggle_icon = "🌙"
+    toggle_lbl  = "Dark Mode"
+    scrollbar_track = "#f5f5f0"
+    scrollbar_thumb = "#cccccc"
+
+accent = "#ff5733"
+
 # ── CUSTOM CSS ─────────────────────────────────────────────────────────────────
-st.markdown("""
+st.markdown(f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+html, body, [class*="css"] {{
+    font-family: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', cursive !important;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+}}
 
-/* ── Base ── */
-html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif;
-}
+.stApp {{
+    background-color: {bg};
+    color: {text_body};
+}}
 
-.stApp {
-    background-color: #0f0f0f;
-    color: #e8e8e8;
-}
-
-/* ── Sidebar ── */
-[data-testid="stSidebar"] {
-    background-color: #141414;
-    border-right: 1px solid #222;
-}
-
-[data-testid="stSidebar"] * {
-    color: #e8e8e8 !important;
-}
-
-/* ── Hide default header & white ribbon ── */
-#MainMenu, footer { visibility: hidden; }
-header[data-testid="stHeader"] {
-    background: transparent !important;
-    height: 0 !important;
-    min-height: 0 !important;
-    visibility: hidden !important;
-}
-[data-testid="stToolbar"] { display: none !important; }
-.stDeployButton { display: none !important; }
-
-/* ── Force sidebar open and visible ── */
-[data-testid="stSidebar"] {
+[data-testid="stSidebar"] {{
+    background-color: {sidebar_bg};
+    border-right: 1px solid {hr_color};
     display: block !important;
     visibility: visible !important;
-    min-width: 260px !important;
-    max-width: 260px !important;
+    min-width: 270px !important;
+    max-width: 270px !important;
     transform: none !important;
-}
+}}
+[data-testid="stSidebar"] * {{
+    color: {text_body} !important;
+    font-family: 'Comic Sans MS', 'Comic Sans', cursive !important;
+}}
 
-/* ── Hide the sidebar collapse arrow button ── */
-[data-testid="collapsedControl"] {
-    display: none !important;
-}
+#MainMenu, footer {{ visibility: hidden; }}
+header[data-testid="stHeader"] {{
+    background: transparent !important;
+    height: 0 !important; min-height: 0 !important;
+    visibility: hidden !important;
+}}
+[data-testid="stToolbar"] {{ display: none !important; }}
+.stDeployButton {{ display: none !important; }}
+[data-testid="collapsedControl"] {{ display: none !important; }}
+button[kind="header"] {{ display: none !important; }}
 
-button[kind="header"] {
-    display: none !important;
-}
-
-/* ── Tabs ── */
-.stTabs [data-baseweb="tab-list"] {
-    background-color: #1a1a1a;
+.stTabs [data-baseweb="tab-list"] {{
+    background-color: {tab_bg};
     border-radius: 12px;
-    padding: 4px;
-    gap: 4px;
-    border: 1px solid #2a2a2a;
-}
-
-.stTabs [data-baseweb="tab"] {
+    padding: 4px; gap: 4px;
+    border: 1px solid {tab_border};
+}}
+.stTabs [data-baseweb="tab"] {{
     background-color: transparent;
-    color: #888 !important;
+    color: {text_muted} !important;
     border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    font-size: 14px;
-    padding: 8px 20px;
+    font-family: 'Comic Sans MS', cursive !important;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 10px 22px;
     transition: all 0.2s ease;
-}
-
-.stTabs [aria-selected="true"] {
-    background-color: #ff5733 !important;
+}}
+.stTabs [aria-selected="true"] {{
+    background-color: {accent} !important;
     color: #fff !important;
-}
+}}
 
-/* ── Chat container ── */
-[data-testid="stVerticalBlock"] > div:has(.stContainer) > div {
-    border-radius: 16px;
-}
+[data-testid="stChatMessage"] {{
+    background-color: {card_bg} !important;
+    border: 1px solid {card_border};
+    border-radius: 16px !important;
+    padding: 16px 22px !important;
+    margin-bottom: 10px;
+}}
+[data-testid="stChatMessage"] p {{
+    font-size: 17px !important;
+    line-height: 1.85 !important;
+    color: {text_body} !important;
+    font-family: 'Comic Sans MS', cursive !important;
+}}
 
-/* ── Chat messages ── */
-[data-testid="stChatMessage"] {
-    background-color: #1a1a1a !important;
-    border: 1px solid #252525;
+[data-testid="stChatInput"] {{
+    background-color: {input_bg} !important;
+    border: 1px solid {input_bdr} !important;
     border-radius: 14px !important;
-    padding: 14px 18px !important;
-    margin-bottom: 8px;
-}
-
-[data-testid="stChatMessage"] p {
-    font-size: 15px;
-    line-height: 1.7;
-    color: #e0e0e0;
-}
-
-/* ── Chat input ── */
-[data-testid="stChatInput"] {
-    background-color: #1a1a1a !important;
-    border: 1px solid #333 !important;
-    border-radius: 14px !important;
-    color: #e8e8e8 !important;
-}
-
-[data-testid="stChatInput"]:focus-within {
-    border-color: #ff5733 !important;
+    color: {text_body} !important;
+    font-size: 16px !important;
+    font-family: 'Comic Sans MS', cursive !important;
+}}
+[data-testid="stChatInput"]:focus-within {{
+    border-color: {accent} !important;
     box-shadow: 0 0 0 2px rgba(255, 87, 51, 0.15) !important;
-}
+}}
 
-/* ── Expander (Sources) ── */
-[data-testid="stExpander"] {
-    background-color: #161616 !important;
-    border: 1px solid #252525 !important;
+[data-testid="stExpander"] {{
+    background-color: {expander_bg} !important;
+    border: 1px solid {card_border} !important;
     border-radius: 10px !important;
-}
-
-[data-testid="stExpander"] summary {
-    font-size: 13px !important;
-    color: #888 !important;
+}}
+[data-testid="stExpander"] summary {{
+    font-size: 14px !important;
+    color: {text_muted} !important;
     font-family: 'JetBrains Mono', monospace !important;
-}
+}}
 
-/* ── Suggestion buttons ── */
-div[data-testid="stHorizontalBlock"] .stButton > button {
-    background-color: #1a1a1a !important;
-    color: #888 !important;
-    border: 1px solid #2a2a2a !important;
+div[data-testid="stHorizontalBlock"] .stButton > button {{
+    background-color: {card_bg} !important;
+    color: {text_muted} !important;
+    border: 1px solid {card_border} !important;
     border-radius: 20px !important;
-    font-size: 13px !important;
-    padding: 8px 16px !important;
-    font-weight: 400 !important;
+    font-size: 15px !important;
+    padding: 10px 18px !important;
+    font-family: 'Comic Sans MS', cursive !important;
     transition: all 0.2s ease;
-}
+}}
+div[data-testid="stHorizontalBlock"] .stButton > button:hover {{
+    background-color: {hover_bg} !important;
+    color: {accent} !important;
+    border-color: {accent} !important;
+}}
 
-div[data-testid="stHorizontalBlock"] .stButton > button:hover {
-    background-color: #222 !important;
-    color: #ff5733 !important;
-    border-color: #ff5733 !important;
-}
-
-/* ── Buttons ── */
-.stButton > button {
+.stButton > button {{
     background-color: transparent;
-    color: #ff5733 !important;
-    border: 1px solid #ff5733 !important;
+    color: {accent} !important;
+    border: 1px solid {accent} !important;
     border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    font-size: 13px;
-    padding: 6px 16px;
+    font-family: 'Comic Sans MS', cursive !important;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 8px 18px;
     transition: all 0.2s ease;
     width: 100%;
-}
-
-.stButton > button:hover {
-    background-color: #ff5733 !important;
+}}
+.stButton > button:hover {{
+    background-color: {accent} !important;
     color: #fff !important;
-}
-
-.stDownloadButton > button {
-    background-color: #ff5733 !important;
+}}
+.stDownloadButton > button {{
+    background-color: {accent} !important;
     color: #fff !important;
     border: none !important;
     border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
+    font-family: 'Comic Sans MS', cursive !important;
+    font-weight: 600;
+    font-size: 16px;
     width: 100%;
-    padding: 10px;
-}
+    padding: 12px;
+}}
 
-/* ── Divider ── */
-hr {
-    border-color: #222 !important;
-    margin: 16px 0;
-}
+hr {{ border-color: {hr_color} !important; margin: 16px 0; }}
 
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #0f0f0f; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #ff5733; }
+::-webkit-scrollbar {{ width: 4px; }}
+::-webkit-scrollbar-track {{ background: {scrollbar_track}; }}
+::-webkit-scrollbar-thumb {{ background: {scrollbar_thumb}; border-radius: 4px; }}
+::-webkit-scrollbar-thumb:hover {{ background: {accent}; }}
 
-/* ── Spinner ── */
-[data-testid="stSpinner"] { color: #ff5733 !important; }
+[data-testid="stSpinner"] {{ color: {accent} !important; }}
 
-/* ── Caption / small text ── */
-.stCaption, [data-testid="stCaptionContainer"] {
-    color: #555 !important;
+.stCaption, [data-testid="stCaptionContainer"] {{
+    color: {text_dim} !important;
     font-size: 13px !important;
-}
+}}
+
+.stMarkdown, .stMarkdown p, .stMarkdown li {{
+    font-family: 'Comic Sans MS', cursive !important;
+    color: {text_body};
+}}
 </style>
 """, unsafe_allow_html=True)
 
 
 # ── SIDEBAR ────────────────────────────────────────────────────────────────────
 with st.sidebar:
-    # Profile header
-    st.markdown("""
-    <div style="text-align: center; padding: 24px 0 16px 0;">
+    st.markdown(f"""
+    <div style="text-align: center; padding: 28px 0 20px 0;">
         <div style="
-            width: 72px; height: 72px;
+            width: 76px; height: 76px;
             background: linear-gradient(135deg, #ff5733, #ff8c42);
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 28px;
-            margin: 0 auto 14px auto;
-            box-shadow: 0 4px 20px rgba(255,87,51,0.3);
+            font-size: 30px; font-weight: 700; color: #fff;
+            margin: 0 auto 16px auto;
+            box-shadow: 0 6px 24px rgba(255,87,51,0.3);
+            font-family: Comic Sans MS, cursive;
         ">H</div>
-        <div style="font-family: 'DM Serif Display', serif; font-size: 20px; color: #f0f0f0; margin-bottom: 4px;">
+        <div style="font-family: Comic Sans MS, cursive; font-size: 21px; color: {text_main}; margin-bottom: 6px; font-weight: 700;">
             Hargurjeet Singh
         </div>
-        <div style="font-size: 12px; color: #ff5733; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;">
+        <div style="font-size: 12px; color: {accent}; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; font-family: Comic Sans MS, cursive;">
             Lead GenAI Specialist
         </div>
     </div>
@@ -241,32 +266,23 @@ with st.sidebar:
 
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    # Quick links
-    st.markdown("""
-    <div style="padding: 0 4px;">
-        <div style="font-size: 11px; color: #555; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600;">Connect</div>
-        <a href="https://www.linkedin.com/in/hargurjeet/" target="_blank" style="
-            display: flex; align-items: center; gap: 10px;
-            color: #aaa; text-decoration: none; font-size: 14px;
-            padding: 8px 10px; border-radius: 8px;
-            transition: background 0.2s;
-            margin-bottom: 4px;
-        " onmouseover="this.style.background='#222'" onmouseout="this.style.background='transparent'">
+    # ── THEME TOGGLE BUTTON ────────────────────────────────────────────────────
+    if st.button(f"{toggle_icon}  {toggle_lbl}"):
+        st.session_state.dark_mode = not st.session_state.dark_mode
+        st.rerun()
+
+    st.markdown("<hr>", unsafe_allow_html=True)
+
+    st.markdown(f"""
+    <div style="padding: 0 6px;">
+        <div style="font-size: 11px; color: {text_dim}; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px; font-weight: 700; font-family: Comic Sans MS, cursive;">Connect</div>
+        <a href="https://www.linkedin.com/in/hargurjeet/" target="_blank" style="display:flex;align-items:center;gap:12px;color:{text_muted};text-decoration:none;font-size:15px;padding:10px 12px;border-radius:10px;font-family:Comic Sans MS,cursive;margin-bottom:4px;" onmouseover="this.style.background='{hover_bg}'" onmouseout="this.style.background='transparent'">
             🔗 &nbsp;LinkedIn
         </a>
-        <a href="https://github.com/hargurjeet" target="_blank" style="
-            display: flex; align-items: center; gap: 10px;
-            color: #aaa; text-decoration: none; font-size: 14px;
-            padding: 8px 10px; border-radius: 8px;
-            margin-bottom: 4px;
-        " onmouseover="this.style.background='#222'" onmouseout="this.style.background='transparent'">
+        <a href="https://github.com/hargurjeet" target="_blank" style="display:flex;align-items:center;gap:12px;color:{text_muted};text-decoration:none;font-size:15px;padding:10px 12px;border-radius:10px;font-family:Comic Sans MS,cursive;margin-bottom:4px;" onmouseover="this.style.background='{hover_bg}'" onmouseout="this.style.background='transparent'">
             🐙 &nbsp;GitHub
         </a>
-        <a href="mailto:gurjeet333@gmail.com" style="
-            display: flex; align-items: center; gap: 10px;
-            color: #aaa; text-decoration: none; font-size: 14px;
-            padding: 8px 10px; border-radius: 8px;
-        " onmouseover="this.style.background='#222'" onmouseout="this.style.background='transparent'">
+        <a href="mailto:gurjeet333@gmail.com" style="display:flex;align-items:center;gap:12px;color:{text_muted};text-decoration:none;font-size:15px;padding:10px 12px;border-radius:10px;font-family:Comic Sans MS,cursive;" onmouseover="this.style.background='{hover_bg}'" onmouseout="this.style.background='transparent'">
             ✉️ &nbsp;Email
         </a>
     </div>
@@ -274,22 +290,21 @@ with st.sidebar:
 
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    # Stats
-    st.markdown("""
-    <div style="padding: 0 4px;">
-        <div style="font-size: 11px; color: #555; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600;">Quick Facts</div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                <span style="color: #777;">Experience</span>
-                <span style="color: #ff5733; font-weight: 600;">15+ years</span>
+    st.markdown(f"""
+    <div style="padding: 0 6px;">
+        <div style="font-size: 11px; color: {text_dim}; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px; font-weight: 700; font-family: Comic Sans MS, cursive;">Quick Facts</div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="color:{text_muted};font-size:15px;font-family:Comic Sans MS,cursive;">Experience</span>
+                <span style="color:{accent};font-weight:700;font-size:15px;font-family:Comic Sans MS,cursive;">15+ years</span>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                <span style="color: #777;">Speciality</span>
-                <span style="color: #ff5733; font-weight: 600;">GenAI / ML</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="color:{text_muted};font-size:15px;font-family:Comic Sans MS,cursive;">Speciality</span>
+                <span style="color:{accent};font-weight:700;font-size:15px;font-family:Comic Sans MS,cursive;">GenAI / ML</span>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                <span style="color: #777;">Cloud</span>
-                <span style="color: #ff5733; font-weight: 600;">AWS · GCP</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="color:{text_muted};font-size:15px;font-family:Comic Sans MS,cursive;">Cloud</span>
+                <span style="color:{accent};font-weight:700;font-size:15px;font-family:Comic Sans MS,cursive;">AWS · GCP</span>
             </div>
         </div>
     </div>
@@ -297,26 +312,25 @@ with st.sidebar:
 
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    # Clear chat button
     if st.button("🗑️  Clear Conversation"):
         st.session_state.messages = []
         st.session_state.sources = {}
         st.rerun()
 
-    st.markdown("""
-    <div style="text-align: center; margin-top: 16px; font-size: 11px; color: #333;">
+    st.markdown(f"""
+    <div style="text-align:center;margin-top:20px;font-size:12px;color:{text_dim};font-family:Comic Sans MS,cursive;">
         Powered by GPT-4o-mini · LangChain · FAISS
     </div>
     """, unsafe_allow_html=True)
 
 
 # ── PAGE HEADER ────────────────────────────────────────────────────────────────
-st.markdown("""
-<div style="padding: 32px 0 20px 0;">
-    <div style="font-family: 'DM Serif Display', serif; font-size: 36px; color: #f0f0f0; line-height: 1.1;">
+st.markdown(f"""
+<div style="padding: 36px 0 24px 0;">
+    <div style="font-family: Comic Sans MS, cursive; font-size: 46px; color: {text_main}; line-height: 1.1; font-weight: 700;">
         Ask me anything
     </div>
-    <div style="font-size: 15px; color: #555; margin-top: 6px;">
+    <div style="font-size: 18px; color: {text_muted}; margin-top: 8px; font-family: Comic Sans MS, cursive;">
         about Hargurjeet's experience, skills, and background
     </div>
 </div>
@@ -329,7 +343,6 @@ chat_tab, resume_tab, blogs_tab, projects_tab = st.tabs(["💬  Chat", "📄  Re
 # ── TAB 1: CHAT ────────────────────────────────────────────────────────────────
 with chat_tab:
 
-    # Initialise session state
     if "messages" not in st.session_state:
         st.session_state.messages = []
     if "sources" not in st.session_state:
@@ -345,21 +358,16 @@ with chat_tab:
                 history.append([msgs[i]["content"], msgs[i + 1]["content"]])
         return history
 
-    # Scrollable chat container
     chat_container = st.container(height=520)
     with chat_container:
         if not st.session_state.messages:
-            st.markdown("""
-            <div style="
-                display: flex; flex-direction: column;
-                align-items: center; justify-content: center;
-                height: 280px; gap: 12px;
-            ">
-                <div style="font-size: 40px;">⚡</div>
-                <div style="font-family: 'DM Serif Display', serif; font-size: 22px; color: #444;">
+            st.markdown(f"""
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;gap:12px;">
+                <div style="font-size:44px;">⚡</div>
+                <div style="font-family:Comic Sans MS,cursive;font-size:24px;color:{text_muted};font-weight:700;">
                     Start a conversation
                 </div>
-                <div style="font-size: 13px; color: #333; text-align: center; max-width: 320px; line-height: 1.6;">
+                <div style="font-size:16px;color:{text_dim};text-align:center;max-width:340px;line-height:1.7;font-family:Comic Sans MS,cursive;">
                     Click a suggestion below or type your own question
                 </div>
             </div>
@@ -373,7 +381,6 @@ with chat_tab:
                         for j, src in enumerate(st.session_state.sources[i]):
                             st.markdown(f"`[{j+1}]` {src['source']} — page {src['page']}")
 
-    # ── Suggestion buttons (only shown when no messages yet) ──
     if not st.session_state.messages:
         suggestions = [
             "What's his GenAI experience?",
@@ -387,14 +394,10 @@ with chat_tab:
                     st.session_state.preset_question = suggestion
                     st.rerun()
 
-    # ── Chat input — also handles preset questions from suggestion buttons ──
     user_input = st.chat_input("Ask anything about Hargurjeet...")
-
-    # Pick up either typed input or button-triggered preset
     question = user_input or st.session_state.pop("preset_question", None)
 
     if question:
-
         chat_history = build_chat_history()
         st.session_state.messages.append({"role": "user", "content": question})
 
@@ -405,7 +408,6 @@ with chat_tab:
                 stream=True
             ) as response:
                 response.raise_for_status()
-
                 full_answer = ""
                 sources = []
 
@@ -422,13 +424,10 @@ with chat_tab:
                             payload = line[len("data: "):]
                             if payload == "[DONE]":
                                 break
-
                             data = json.loads(payload)
-
                             if "token" in data:
                                 full_answer += data["token"]
                                 token_placeholder.markdown(full_answer + "▌")
-
                             if "sources" in data:
                                 sources = data["sources"]
 
@@ -499,296 +498,72 @@ with resume_tab:
 # ── TAB 3: BLOGS ───────────────────────────────────────────────────────────────
 with blogs_tab:
 
-    # ── Blog data — update this list with your real posts ──
     BLOGS = [
-        {
-            "title": "Stop Writing Buggy APIs: Why Pydantic Should Be Your New Best Friend",
-            "platform": "LinkedIn",
-            "url": "https://www.linkedin.com/pulse/stop-writing-buggy-apis-why-pydantic-should-your-new-best-ganger-vpcpc/?trackingId=lzRLeNiCTYaVpRzDr6fB0A%3D%3D",
-            "thumbnail": "https://miro.medium.com/v2/resize:fit:1200/1*placeholder.png",
-            "emoji": "🔗",
-        },
-        {
-            "title": "From Videos to Blogs: Unlock Content Creation with Crewai",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/from-videos-to-blogs-unlock-content-creation-with-crewai-774f1bc083bf",
-            "thumbnail": "https://miro.medium.com/v2/resize:fit:1200/1*placeholder.png",
-            "emoji": "🔗",
-        },
-        {
-            "title": "Mastering AI Agents: A Journey from Basics to Execution",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/mastering-ai-agents-a-journey-from-basics-to-execution-3ec35c6aa93c",
-            "thumbnail": "",
-            "emoji": "🧠",
-        },
-        {
-            "title": "Time Series Forecasting Using AUTO ARIMA + PROPHET + LightGBM",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/time-series-forecasting-using-auto-arima-prophet-lightgbm-6362ef486c95",
-            "thumbnail": "",
-            "emoji": "🤖",
-        },
-        {
-            "title": "Machine Learning with Python: Implementing XGBoost and Random Forest",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/machine-learning-with-python-implementing-xgboost-and-random-forest-fd51fa4f9f4c",
-            "thumbnail": "",
-            "emoji": "☁️",
-        },
-        {
-            "title": "Learn how to build an advanced chatbot with a cloud vector database",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/learn-how-to-build-a-chatbot-from-scratch-on-a-free-cloud-vector-database-193a7fa29c13",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Performing Sentence Similarity By Leveraging Hugging Face APIs",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/performing-sentence-similarity-by-leveraging-hugging-face-apis-8ca0846e299c",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Working with SQL in Python Environment?",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/working-with-sql-in-python-environment-917385774583",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Best Known Techniques For Data Scientist To Handle Missing/Null Values In Any Tabular Dataset",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/best-known-techniques-for-data-scientist-to-handle-missing-null-values-in-any-tabular-dataset-3a9f71c9486",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Sentiment Analysis of Movie Reviews with Google’s BERT",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/sentiment-analysis-of-movie-reviews-with-googles-bert-c2b97f4217f",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Understanding Machine Learning Pipeline — A Gentle Introduction",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/understanding-machine-learning-pipeline-a-gentle-introduction-ca96419108dc",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Learning k-folds Cross Validations",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/learning-k-folds-cross-validations-69b981c91e3a",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Building Recommendations System? A Beginner Guide",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/building-recommendations-system-a-beginner-guide-8593f205bc0a",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "What Should I Read Next? Books Recommendation",
-            "platform": "Medium",
-            "url": "https://medium.com/nerd-for-tech/what-should-i-read-next-books-recommendation-311666254817",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "NLP — Detecting Fake News On Social Media",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/nlp-detecting-fake-news-on-social-media-aa53ff74f2ff",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Fake or Not ? Twitter Disaster Tweets",
-            "platform": "Medium",
-            "url": "https://medium.com/geekculture/fake-or-not-twitter-disaster-tweets-f1a6b2311be9",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Fake or Not ? Twitter Disaster Tweets",
-            "platform": "Medium",
-            "url": "https://medium.com/geekculture/fake-or-not-twitter-disaster-tweets-f1a6b2311be9",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "PyTorch — Training Fruit 360 Classifier Under 5 mins",
-            "platform": "Medium",
-            "url": "https://medium.com/geekculture/pytorch-training-fruit-360-classifier-under-5-mins-23153b46ec88",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "7 Best Techniques To Improve The Accuracy of CNN W/O Overfitting",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/7-best-techniques-to-improve-the-accuracy-of-cnn-w-o-overfitting-6db06467182f",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Training Convolutional Neural Network(ConvNet/CNN) on GPU From Scratch",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/training-convolutional-neural-network-convnet-cnn-on-gpu-from-scratch-439e9fdc13a5",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Training Feed Forward Neural Network(FFNN) on GPU — Beginners Guide",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/training-feed-forward-neural-network-ffnn-on-gpu-beginners-guide-2d04254deca9",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Logistic Regression With PyTorch — A Beginner Guide",
-            "platform": "Medium",
-            "url": "https://medium.com/analytics-vidhya/logistic-regression-with-pytorch-a-beginner-guide-33c2266ad129",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Getting Started With Machine Learning — Swedish Auto Insurance Dataset",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/getting-started-with-machine-learning-swedish-auto-insurance-dataset-e3583267d0ee",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Explanatory Data Analysis With Python -Beginners Guide",
-            "platform": "Medium",
-            "url": "https://medium.com/geekculture/covid-19-explanatory-data-analysis-76cab46c48d1",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Exploratory Data Analysis of Zomato’s Restaurant Dataset",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/explanatory-data-analysis-of-zomato-restaurant-data-71ba8c3c7e5e",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Deep Learning for Beginners Using TensorFlow",
-            "platform": "Medium",
-            "url": "https://medium.com/analytics-vidhya/cnn-german-traffic-signal-recognition-benchmarking-using-tensorflow-accuracy-80-d069b7996082",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "CNN Model for Gender and Ethnicity Prediction with Tensorflow",
-            "platform": "Medium",
-            "url": "https://gurjeet333.medium.com/cnn-model-for-gender-and-ethnicity-prediction-with-tensorflow-ffbbaa4efdad",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
-        {
-            "title": "Data Exploration of historical Olympics dataset",
-            "platform": "Medium",
-            "url": "https://medium.com/nerd-for-tech/data-exploration-of-historical-olympics-dataset-2d50a7d0611d",
-            "thumbnail": "",
-            "emoji": "📊",
-        },
+        {"title": "Stop Writing Buggy APIs: Why Pydantic Should Be Your New Best Friend", "platform": "LinkedIn", "url": "https://www.linkedin.com/pulse/stop-writing-buggy-apis-why-pydantic-should-your-new-best-ganger-vpcpc/?trackingId=lzRLeNiCTYaVpRzDr6fB0A%3D%3D", "emoji": "🔗"},
+        {"title": "From Videos to Blogs: Unlock Content Creation with Crewai", "platform": "Medium", "url": "https://gurjeet333.medium.com/from-videos-to-blogs-unlock-content-creation-with-crewai-774f1bc083bf", "emoji": "🎬"},
+        {"title": "Mastering AI Agents: A Journey from Basics to Execution", "platform": "Medium", "url": "https://gurjeet333.medium.com/mastering-ai-agents-a-journey-from-basics-to-execution-3ec35c6aa93c", "emoji": "🧠"},
+        {"title": "Time Series Forecasting Using AUTO ARIMA + PROPHET + LightGBM", "platform": "Medium", "url": "https://gurjeet333.medium.com/time-series-forecasting-using-auto-arima-prophet-lightgbm-6362ef486c95", "emoji": "📈"},
+        {"title": "Machine Learning with Python: Implementing XGBoost and Random Forest", "platform": "Medium", "url": "https://gurjeet333.medium.com/machine-learning-with-python-implementing-xgboost-and-random-forest-fd51fa4f9f4c", "emoji": "🌲"},
+        {"title": "Learn how to build an advanced chatbot with a cloud vector database", "platform": "Medium", "url": "https://gurjeet333.medium.com/learn-how-to-build-a-chatbot-from-scratch-on-a-free-cloud-vector-database-193a7fa29c13", "emoji": "💬"},
+        {"title": "Performing Sentence Similarity By Leveraging Hugging Face APIs", "platform": "Medium", "url": "https://gurjeet333.medium.com/performing-sentence-similarity-by-leveraging-hugging-face-apis-8ca0846e299c", "emoji": "🤗"},
+        {"title": "Working with SQL in Python Environment?", "platform": "Medium", "url": "https://gurjeet333.medium.com/working-with-sql-in-python-environment-917385774583", "emoji": "🗄️"},
+        {"title": "Best Known Techniques For Data Scientist To Handle Missing/Null Values", "platform": "Medium", "url": "https://gurjeet333.medium.com/best-known-techniques-for-data-scientist-to-handle-missing-null-values-in-any-tabular-dataset-3a9f71c9486", "emoji": "🔧"},
+        {"title": "Sentiment Analysis of Movie Reviews with Google's BERT", "platform": "Medium", "url": "https://gurjeet333.medium.com/sentiment-analysis-of-movie-reviews-with-googles-bert-c2b97f4217f", "emoji": "🎬"},
+        {"title": "Understanding Machine Learning Pipeline — A Gentle Introduction", "platform": "Medium", "url": "https://gurjeet333.medium.com/understanding-machine-learning-pipeline-a-gentle-introduction-ca96419108dc", "emoji": "🔄"},
+        {"title": "Learning k-folds Cross Validations", "platform": "Medium", "url": "https://gurjeet333.medium.com/learning-k-folds-cross-validations-69b981c91e3a", "emoji": "📐"},
+        {"title": "Building Recommendations System? A Beginner Guide", "platform": "Medium", "url": "https://gurjeet333.medium.com/building-recommendations-system-a-beginner-guide-8593f205bc0a", "emoji": "⭐"},
+        {"title": "What Should I Read Next? Books Recommendation", "platform": "Medium", "url": "https://medium.com/nerd-for-tech/what-should-i-read-next-books-recommendation-311666254817", "emoji": "📚"},
+        {"title": "NLP — Detecting Fake News On Social Media", "platform": "Medium", "url": "https://gurjeet333.medium.com/nlp-detecting-fake-news-on-social-media-aa53ff74f2ff", "emoji": "📰"},
+        {"title": "Fake or Not? Twitter Disaster Tweets", "platform": "Medium", "url": "https://medium.com/geekculture/fake-or-not-twitter-disaster-tweets-f1a6b2311be9", "emoji": "🐦"},
+        {"title": "PyTorch — Training Fruit 360 Classifier Under 5 mins", "platform": "Medium", "url": "https://medium.com/geekculture/pytorch-training-fruit-360-classifier-under-5-mins-23153b46ec88", "emoji": "🍎"},
+        {"title": "7 Best Techniques To Improve The Accuracy of CNN W/O Overfitting", "platform": "Medium", "url": "https://gurjeet333.medium.com/7-best-techniques-to-improve-the-accuracy-of-cnn-w-o-overfitting-6db06467182f", "emoji": "🎯"},
+        {"title": "Training Convolutional Neural Network on GPU From Scratch", "platform": "Medium", "url": "https://gurjeet333.medium.com/training-convolutional-neural-network-convnet-cnn-on-gpu-from-scratch-439e9fdc13a5", "emoji": "⚡"},
+        {"title": "Training Feed Forward Neural Network on GPU — Beginners Guide", "platform": "Medium", "url": "https://gurjeet333.medium.com/training-feed-forward-neural-network-ffnn-on-gpu-beginners-guide-2d04254deca9", "emoji": "🔬"},
+        {"title": "Logistic Regression With PyTorch — A Beginner Guide", "platform": "Medium", "url": "https://medium.com/analytics-vidhya/logistic-regression-with-pytorch-a-beginner-guide-33c2266ad129", "emoji": "📊"},
+        {"title": "Getting Started With Machine Learning — Swedish Auto Insurance Dataset", "platform": "Medium", "url": "https://gurjeet333.medium.com/getting-started-with-machine-learning-swedish-auto-insurance-dataset-e3583267d0ee", "emoji": "🚗"},
+        {"title": "Explanatory Data Analysis With Python - Beginners Guide", "platform": "Medium", "url": "https://medium.com/geekculture/covid-19-explanatory-data-analysis-76cab46c48d1", "emoji": "🔍"},
+        {"title": "Exploratory Data Analysis of Zomato's Restaurant Dataset", "platform": "Medium", "url": "https://gurjeet333.medium.com/explanatory-data-analysis-of-zomato-restaurant-data-71ba8c3c7e5e", "emoji": "🍽️"},
+        {"title": "Deep Learning for Beginners Using TensorFlow", "platform": "Medium", "url": "https://medium.com/analytics-vidhya/cnn-german-traffic-signal-recognition-benchmarking-using-tensorflow-accuracy-80-d069b7996082", "emoji": "🤖"},
+        {"title": "CNN Model for Gender and Ethnicity Prediction with Tensorflow", "platform": "Medium", "url": "https://gurjeet333.medium.com/cnn-model-for-gender-and-ethnicity-prediction-with-tensorflow-ffbbaa4efdad", "emoji": "👤"},
+        {"title": "Data Exploration of historical Olympics dataset", "platform": "Medium", "url": "https://medium.com/nerd-for-tech/data-exploration-of-historical-olympics-dataset-2d50a7d0611d", "emoji": "🏅"},
     ]
 
-    PLATFORM_COLORS = {
-        "Medium":   {"bg": "#1a1a1a", "badge": "#292929", "text": "#e8e8e8", "accent": "#ff5733"},
-        "LinkedIn": {"bg": "#1a1a1a", "badge": "#1a3a5c", "text": "#e8e8e8", "accent": "#0a66c2"},
-    }
-
     def platform_badge(platform):
-        color = PLATFORM_COLORS.get(platform, {}).get("badge", "#333")
-        text_color = "#0a66c2" if platform == "LinkedIn" else "#ff5733"
-        icon = "in" if platform == "LinkedIn" else "M"
-        return f"""
-        <span style="
-            background:{color}; color:{text_color};
-            font-size:11px; font-weight:700; letter-spacing:0.5px;
-            padding:3px 9px; border-radius:4px;
-            font-family:'JetBrains Mono', monospace;
-        ">{icon} {platform}</span>"""
+        if platform == "LinkedIn":
+            bg_b, txt, icon = "#1a3a5c", "#4da6ff", "in"
+        else:
+            bg_b, txt, icon = "#2a1a1a", "#ff6b4a", "M"
+        return f'<span style="background:{bg_b};color:{txt};font-size:11px;font-weight:700;letter-spacing:0.5px;padding:4px 10px;border-radius:4px;font-family:JetBrains Mono,monospace;">{icon} {platform}</span>'
 
     featured = BLOGS[0]
     rest = BLOGS[1:]
 
-    # ── FEATURED BLOG ──────────────────────────────────────────────────────────
-    st.markdown("""
-    <div style="font-size:11px; color:#555; letter-spacing:1.5px;
-         text-transform:uppercase; font-weight:600; margin-bottom:14px; margin-top:8px;">
-        Featured
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f'<div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:16px;margin-top:8px;font-family:Comic Sans MS,cursive;">⭐ Featured</div>', unsafe_allow_html=True)
 
     st.markdown(f"""
     <a href="{featured['url']}" target="_blank" style="text-decoration:none;">
-        <div style="
-            background: linear-gradient(135deg, #1a1a1a 0%, #1f1f1f 100%);
-            border: 1px solid #2a2a2a;
-            border-radius: 16px;
-            padding: 32px 36px;
-            display: flex; align-items: center; gap: 32px;
-            transition: border-color 0.2s;
-            margin-bottom: 28px;
-            cursor: pointer;
-        " onmouseover="this.style.borderColor='#ff5733'" onmouseout="this.style.borderColor='#2a2a2a'">
-            <div style="
-                font-size: 52px; min-width: 80px; height: 80px;
-                background: #252525; border-radius: 14px;
-                display: flex; align-items: center; justify-content: center;
-            ">{featured['emoji']}</div>
-            <div style="flex: 1;">
-                <div style="margin-bottom: 10px;">{platform_badge(featured['platform'])}</div>
-                <div style="
-                    font-family: 'DM Serif Display', serif;
-                    font-size: 22px; color: #f0f0f0; line-height: 1.35;
-                    margin-bottom: 10px;
-                ">{featured['title']}</div>
-                <div style="font-size: 13px; color: #ff5733; font-weight: 500;">
-                    Read article →
-                </div>
+        <div style="background:{card_bg};border:1px solid {card_border};border-radius:18px;padding:34px 40px;display:flex;align-items:center;gap:32px;margin-bottom:28px;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='{accent}'" onmouseout="this.style.borderColor='{card_border}'">
+            <div style="font-size:52px;min-width:80px;height:80px;background:{tag_bg};border-radius:14px;display:flex;align-items:center;justify-content:center;">{featured['emoji']}</div>
+            <div style="flex:1;">
+                <div style="margin-bottom:12px;">{platform_badge(featured['platform'])}</div>
+                <div style="font-family:Comic Sans MS,cursive;font-size:22px;color:{text_main};line-height:1.4;margin-bottom:12px;font-weight:700;">{featured['title']}</div>
+                <div style="font-size:14px;color:{accent};font-weight:600;font-family:Comic Sans MS,cursive;">Read article →</div>
             </div>
         </div>
     </a>
     """, unsafe_allow_html=True)
 
-    # ── REST OF BLOGS ──────────────────────────────────────────────────────────
-    st.markdown("""
-    <div style="font-size:11px; color:#555; letter-spacing:1.5px;
-         text-transform:uppercase; font-weight:600; margin-bottom:14px;">
-        All Posts
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f'<div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:16px;font-family:Comic Sans MS,cursive;">📝 All Posts</div>', unsafe_allow_html=True)
 
     for blog in rest:
-        accent = "#0a66c2" if blog["platform"] == "LinkedIn" else "#ff5733"
+        a = "#4da6ff" if blog["platform"] == "LinkedIn" else accent
         st.markdown(f"""
         <a href="{blog['url']}" target="_blank" style="text-decoration:none;">
-            <div style="
-                background: #141414;
-                border: 1px solid #222;
-                border-left: 3px solid {accent};
-                border-radius: 10px;
-                padding: 18px 22px;
-                display: flex; align-items: center; gap: 18px;
-                margin-bottom: 10px;
-                transition: background 0.2s;
-            " onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background='#141414'">
-                <div style="font-size:26px; min-width:40px; text-align:center;">{blog['emoji']}</div>
-                <div style="flex:1;">
-                    <div style="font-size:15px; color:#e0e0e0; font-weight:500; line-height:1.4;">
-                        {blog['title']}
-                    </div>
-                </div>
+            <div style="background:{blog_bg};border:1px solid {blog_bdr};border-left:3px solid {a};border-radius:10px;padding:18px 22px;display:flex;align-items:center;gap:16px;margin-bottom:9px;transition:background 0.2s;" onmouseover="this.style.background='{hover_bg}'" onmouseout="this.style.background='{blog_bg}'">
+                <div style="font-size:24px;min-width:36px;text-align:center;">{blog['emoji']}</div>
+                <div style="flex:1;font-size:15px;color:{text_body};font-weight:600;line-height:1.5;font-family:Comic Sans MS,cursive;">{blog['title']}</div>
                 <div>{platform_badge(blog['platform'])}</div>
-                <div style="color:#444; font-size:18px; padding-left:8px;">→</div>
+                <div style="color:{text_muted};font-size:18px;padding-left:8px;">→</div>
             </div>
         </a>
         """, unsafe_allow_html=True)
@@ -827,31 +602,26 @@ with projects_tab:
         },
     ]
 
-    st.markdown(
-        '<div style="font-size:11px;color:#555;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-bottom:20px;margin-top:8px;">Deployed Projects</div>',
-        unsafe_allow_html=True
-    )
+    st.markdown(f'<div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:24px;margin-top:8px;font-family:Comic Sans MS,cursive;">🚀 Deployed Projects</div>', unsafe_allow_html=True)
 
     for project in PROJECTS:
         status_color = "#22c55e" if project["status"] == "Live" else "#f59e0b"
-
         tags_html = "".join([
-            f'<span style="background:#252525;color:#888;font-size:11px;font-family:JetBrains Mono,monospace;padding:3px 10px;border-radius:4px;margin-right:6px;margin-bottom:4px;display:inline-block;">{tag}</span>'
+            f'<span style="background:{tag_bg};color:{tag_color};font-size:12px;font-family:JetBrains Mono,monospace;padding:4px 12px;border-radius:4px;margin-right:6px;margin-bottom:4px;display:inline-block;">{tag}</span>'
             for tag in project["tags"]
         ])
-
         card = (
-            '<div style="background:#141414;border:1px solid #222;border-radius:16px;overflow:hidden;margin-bottom:24px;">'
-                f'<div style="width:100%;height:180px;background-image:url({project["banner"]});background-size:cover;background-position:center;position:relative;">'
-                    f'<div style="position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.75);border:1px solid {status_color};color:{status_color};font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:0.5px;">&#9679; {project["status"]}</div>'
+            f'<div style="background:{project_bg};border:1px solid {card_border};border-radius:18px;overflow:hidden;margin-bottom:28px;">'
+                f'<div style="width:100%;height:185px;background-image:url({project["banner"]});background-size:cover;background-position:center;position:relative;">'
+                    f'<div style="position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.8);border:1px solid {status_color};color:{status_color};font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;font-family:Comic Sans MS,cursive;">&#9679; {project["status"]}</div>'
                 '</div>'
-                '<div style="padding:22px 26px 20px 26px;">'
-                    f'<div style="font-family:Georgia,serif;font-size:20px;color:#f0f0f0;margin-bottom:10px;line-height:1.3;">{project["title"]}</div>'
-                    f'<div style="font-size:14px;color:#777;line-height:1.65;margin-bottom:16px;">{project["description"]}</div>'
-                    f'<div style="margin-bottom:20px;">{tags_html}</div>'
+                f'<div style="padding:26px 30px 24px 30px;">'
+                    f'<div style="font-family:Comic Sans MS,cursive;font-size:22px;color:{text_main};margin-bottom:12px;line-height:1.3;font-weight:700;">{project["title"]}</div>'
+                    f'<div style="font-size:15px;color:{text_muted};line-height:1.75;margin-bottom:18px;font-family:Comic Sans MS,cursive;">{project["description"]}</div>'
+                    f'<div style="margin-bottom:22px;">{tags_html}</div>'
                     '<div style="display:flex;gap:12px;">'
-                        f'<a href="{project["live_url"]}" target="_blank" style="text-decoration:none;"><div style="background:#ff5733;color:#fff;font-size:13px;font-weight:600;padding:9px 20px;border-radius:8px;display:inline-flex;align-items:center;gap:7px;">🚀 Launch App</div></a>'
-                        f'<a href="{project["github_url"]}" target="_blank" style="text-decoration:none;"><div style="background:transparent;color:#aaa;border:1px solid #333;font-size:13px;font-weight:500;padding:9px 20px;border-radius:8px;display:inline-flex;align-items:center;gap:7px;">🐙 View on GitHub</div></a>'
+                        f'<a href="{project["live_url"]}" target="_blank" style="text-decoration:none;"><div style="background:{accent};color:#fff;font-size:14px;font-weight:700;padding:10px 22px;border-radius:9px;display:inline-flex;align-items:center;gap:8px;font-family:Comic Sans MS,cursive;">🚀 Launch App</div></a>'
+                        f'<a href="{project["github_url"]}" target="_blank" style="text-decoration:none;"><div style="background:transparent;color:{text_muted};border:1px solid {card_border};font-size:14px;font-weight:600;padding:10px 22px;border-radius:9px;display:inline-flex;align-items:center;gap:8px;font-family:Comic Sans MS,cursive;">🐙 View on GitHub</div></a>'
                     '</div>'
                 '</div>'
             '</div>'
