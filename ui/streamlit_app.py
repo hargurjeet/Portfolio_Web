@@ -269,19 +269,23 @@ hr {{ border-color: {hr_color} !important; margin: 16px 0; }}
 
 
 # ── SIDEBAR ────────────────────────────────────────────────────────────────────
+AVATAR_PATH = "data/my_avatar.png"
+
 with st.sidebar:
+    # Read and encode the photo
+    if os.path.exists(AVATAR_PATH):
+        with open(AVATAR_PATH, "rb") as img_file:
+            avatar_b64 = base64.b64encode(img_file.read()).decode("utf-8")
+        avatar_html = f'<img src="data:image/png;base64,{avatar_b64}" style="width:180px;height:180px;border-radius:50%;object-fit:cover;border:3px solid {accent};box-shadow:0 6px 24px rgba(255,87,51,0.3);">'
+    else:
+        # Fallback to letter avatar if photo not found
+        avatar_html = f'<div style="width:180px;height:180px;background:linear-gradient(135deg,#ff5733,#ff8c42);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:700;color:#fff;font-family:Comic Sans MS,cursive;">H</div>'
+
     st.markdown(f"""
     <div style="text-align: center; padding: 28px 0 20px 0;">
-        <div style="
-            width: 76px; height: 76px;
-            background: linear-gradient(135deg, #ff5733, #ff8c42);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 30px; font-weight: 700; color: #fff;
-            margin: 0 auto 16px auto;
-            box-shadow: 0 6px 24px rgba(255,87,51,0.3);
-            font-family: Comic Sans MS, cursive;
-        ">H</div>
+        <div style="margin: 0 auto 16px auto; width:180px;">
+            {avatar_html}
+        </div>
         <div style="font-family: Comic Sans MS, cursive; font-size: 21px; color: {text_main}; margin-bottom: 6px; font-weight: 700;">
             Hargurjeet Singh
         </div>
