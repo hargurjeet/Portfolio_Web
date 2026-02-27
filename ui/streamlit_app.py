@@ -708,21 +708,21 @@ with projects_tab:
 
     PROJECTS = [
         {
-            "title": "Portfolio AI Chatbot",
-            "description": "A production-ready RAG-powered chatbot built with LangChain, FAISS, FastAPI and Streamlit. Answers questions about my experience using GPT-4o-mini with conversational memory and streaming responses.",
+            "title": "Finance Planner",
+            "description": "An AI-powered retirement planning tool built with CrewAI and AWS Bedrock.",
             "banner": "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80",
             "tags": ["LangChain", "FastAPI", "Streamlit", "FAISS", "GPT-4o-mini"],
-            "github_url": "https://github.com",
+            "github_url": "https://github.com/hargurjeet/Finance_Planner",
             "live_url": "https://yourapp.streamlit.app",
             "status": "Live",
         },
         {
-            "title": "LLM Evaluation Framework",
-            "description": "An end-to-end framework for evaluating large language model outputs across accuracy, hallucination rate, and latency. Designed for enterprise GenAI deployments.",
-            "banner": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80",
+            "title": "Resume Parser",
+            "description": "An intelligent resume parsing system powered by AWS Bedrock Claude and structured output validation. Extract structured candidate information from PDF resumes with high accuracy using AI.",
+            "banner": "https://images.unsplash.com/photo-1698047681432-006d2449c631?w=1200&q=80",
             "tags": ["Python", "OpenAI", "Pandas", "AWS"],
-            "github_url": "https://github.com",
-            "live_url": "https://yourapp.streamlit.app",
+            "github_url": "https://github.com/hargurjeet/resume-parser",
+            "live_url": "https://huggingface.co/spaces/Hargurjeet/Resume_parser",
             "status": "Live",
         },
     ]
