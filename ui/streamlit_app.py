@@ -19,7 +19,7 @@ if "sidebar_state" not in st.session_state:
 
 # ── THEME STATE ────────────────────────────────────────────────────────────────
 if "dark_mode" not in st.session_state:
-    st.session_state.dark_mode = True
+    st.session_state.dark_mode = False
 
 dark = st.session_state.dark_mode
 
@@ -42,6 +42,7 @@ if dark:
     expander_bg = "#161616"
     tag_bg      = "#252525"
     tag_color   = "#888888"
+    tag_border  = "#333333"
     blog_bg     = "#141414"
     blog_bdr    = "#222222"
     project_bg  = "#141414"
@@ -67,6 +68,7 @@ else:
     expander_bg = "#f9f9f9"
     tag_bg      = "#eeeeee"
     tag_color   = "#555555"
+    tag_border  = "#d0d0d0"
     blog_bg     = "#ffffff"
     blog_bdr    = "#e0e0e0"
     project_bg  = "#ffffff"
@@ -290,25 +292,34 @@ with st.sidebar:
 
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <div style="padding: 0 6px;">
-        <div style="font-size: 11px; color: {text_dim}; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px; font-weight: 700; font-family: Comic Sans MS, cursive;">Quick Facts</div>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="color:{text_muted};font-size:15px;font-family:Comic Sans MS,cursive;">Experience</span>
-                <span style="color:{accent};font-weight:700;font-size:15px;font-family:Comic Sans MS,cursive;">15+ years</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="color:{text_muted};font-size:15px;font-family:Comic Sans MS,cursive;">Speciality</span>
-                <span style="color:{accent};font-weight:700;font-size:15px;font-family:Comic Sans MS,cursive;">GenAI / ML</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="color:{text_muted};font-size:15px;font-family:Comic Sans MS,cursive;">Cloud</span>
-                <span style="color:{accent};font-weight:700;font-size:15px;font-family:Comic Sans MS,cursive;">AWS · GCP</span>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Profile label
+    st.markdown(f'<div style="font-size:11px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;font-weight:700;font-family:Comic Sans MS,cursive;padding:0 6px;">Profile</div>', unsafe_allow_html=True)
+
+    # Stat rows - each as its own call to avoid f-string conflicts
+    for icon, label, value in [
+        ("🏢", "Experience", "15+ years"),
+        ("📍", "Location", "Bangalore"),
+        ("🎓", "Degree", "M.S. ML & AI"),
+        ("☁️", "Cloud", "AWS · GCP"),
+    ]:
+        st.markdown(
+            f'<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px;">'
+            f'<span style="color:{text_muted};font-size:14px;font-family:Comic Sans MS,cursive;">{icon} {label}</span>'
+            f'<span style="color:{accent};font-weight:700;font-size:14px;font-family:Comic Sans MS,cursive;">{value}</span>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+
+    st.markdown(f'<div style="border-top:1px solid {hr_color};margin:12px 6px;"></div>', unsafe_allow_html=True)
+
+    # Core stack chips
+    st.markdown(f'<div style="font-size:11px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:8px;font-family:Comic Sans MS,cursive;padding:0 6px;">Core Stack</div>', unsafe_allow_html=True)
+    skills = ["RAG", "Guardrails", "Multi Agents orchestrations", "Observability", "FastAPI", "Docker", "MLOps", "XGBoost", "CrewAI", "CI/CD"]
+    chips_html = '<div style="display:flex;flex-wrap:wrap;gap:6px;padding:0 6px;">' + "".join(
+        f'<span style="background:{tag_bg};color:{text_muted};font-size:11px;font-family:JetBrains Mono,monospace;padding:3px 8px;border-radius:4px;">{s}</span>'
+        for s in skills
+    ) + '</div>'
+    st.markdown(chips_html, unsafe_allow_html=True)
 
     st.markdown("<hr>", unsafe_allow_html=True)
 
@@ -337,7 +348,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── TABS ───────────────────────────────────────────────────────────────────────
-chat_tab, resume_tab, blogs_tab, projects_tab = st.tabs(["💬  Chat", "📄  Resume", "✍️  Blogs", "🚀  Projects"])
+chat_tab, experience_tab, resume_tab, blogs_tab, projects_tab = st.tabs(["💬  Chat", "🧭  Experience", "📄  Resume", "✍️  Blogs", "🚀  Projects"])
 
 
 # ── TAB 1: CHAT ────────────────────────────────────────────────────────────────
@@ -456,7 +467,139 @@ with chat_tab:
         st.rerun()
 
 
-# ── TAB 2: RESUME ──────────────────────────────────────────────────────────────
+# ── TAB 2: EXPERIENCE ─────────────────────────────────────────────────────────
+with experience_tab:
+
+    st.markdown(f'<div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:28px;margin-top:8px;font-family:Comic Sans MS,cursive;">🧭 Career Timeline</div>', unsafe_allow_html=True)
+
+    EXPERIENCE = [
+        {
+            "role": "Senior Data Scientist",
+            "company": "British Telecom (BT)",
+            "period": "May 2022 – Present",
+            "type": "current",
+            "logo": "🔵",
+            "highlights": [
+                "Built RAG-powered conversational chatbot using LLMs, reducing manual data extraction time by 70%",
+                "Designed scalable AWS pipelines (Textract, OpenSearch, Bedrock) processing 100K+ multimodal documents at 90%+ accuracy",
+                "Implemented multi-step agentic workflows with CrewAI, integrating tool-augmented pipelines with guardrails",
+                "Developed LLM evaluation framework (Ragas) covering hallucination, toxicity, bias, answer relevancy",
+                "Engineered multi-label recommendation model (XGBoost + Random Forest) — increased SD-WAN sales by 10%",
+                "Built market basket / apriori recommendation system — achieved 30% increase in VAS sales",
+            ],
+            "tags": ["LLMs", "RAG", "CrewAI", "AWS Bedrock", "XGBoost", "Docker", "FastAPI", "Ragas"],
+        },
+        {
+            "role": "Data Scientist",
+            "company": "Royal Dutch Shell",
+            "period": "Sep 2016 – May 2022",
+            "type": "past",
+            "logo": "🟡",
+            "highlights": [
+                "Built Power BI forecasting dashboard for materials on-time delivery across 5 geographies, saving 10% budget",
+                "Developed predictive maintenance ML models (XGBoost, Random Forest) — 30% cost reduction, 25% less downtime",
+                "5+ years with databases, data warehousing, ETL and big data analytics technologies",
+                "Applied classification, clustering, statistical inference with scikit-learn, TensorFlow, Keras, PyTorch",
+            ],
+            "tags": ["XGBoost", "Python", "Power BI", "PySpark", "TensorFlow", "PyTorch", "ETL"],
+        },
+        {
+            "role": "IT Analyst",
+            "company": "Tata Consultancy Services (TCS)",
+            "period": "Dec 2010 – Aug 2016",
+            "type": "past",
+            "logo": "🟣",
+            "highlights": [
+                "Performed System Integration Testing & UAT to validate client PoS systems",
+                "Led offshore teams in the UK for implementation of new PoS software",
+                "Worked with card and payment systems, PCI standards and ISO 8583 protocols",
+            ],
+            "tags": ["System Testing", "UAT", "PCI Standards", "ISO 8583", "PoS Systems"],
+        },
+    ]
+
+    EDUCATION = [
+        {
+            "degree": "M.S. in Machine Learning & Artificial Intelligence",
+            "school": "Liverpool John Moores University",
+            "period": "2023 – 2025",
+            "note": "Research thesis on integrating LLMs (GPT-3.5, Mixtral, Llama 3.1) with classical ML models",
+        },
+        {
+            "degree": "Executive PG in Data Science & AI",
+            "school": "IIIT Bangalore",
+            "period": "2022 – 2023",
+            "note": "Statistics, Python, ML, NLP, Neural Networks, MLOps",
+        },
+        {
+            "degree": "B.E. in Electronics & Communication",
+            "school": "New Horizon College of Engineering, VTU",
+            "period": "2006 – 2010",
+            "note": "",
+        },
+    ]
+
+    # ── Timeline ──
+    for i, job in enumerate(EXPERIENCE):
+        is_current = job["type"] == "current"
+        border_color = accent if is_current else (tag_border if not dark else "#333")
+        dot_bg = accent if is_current else text_muted
+
+        # Build tag chips
+        job_chips = "".join(
+            f'<span style="background:{tag_bg};color:{text_muted};font-size:11px;font-family:JetBrains Mono,monospace;padding:3px 9px;border-radius:4px;margin-right:5px;margin-bottom:4px;display:inline-block;">{t}</span>'
+            for t in job["tags"]
+        )
+
+        # Build bullet points
+        bullets = "".join(
+            f'<li style="font-size:15px;color:{text_body};font-family:Comic Sans MS,cursive;line-height:1.7;margin-bottom:6px;">{h}</li>'
+            for h in job["highlights"]
+        )
+
+        # Current badge
+        badge = f'<span style="background:{accent};color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;font-family:Comic Sans MS,cursive;margin-left:10px;">● Current</span>' if is_current else ""
+
+        # Connector line between timeline dots
+        connector = f'<div style="width:2px;flex:1;background:{hr_color};margin-top:8px;"></div>' if i < len(EXPERIENCE) - 1 else ""
+
+        st.markdown(
+            f'<div style="display:flex;gap:20px;margin-bottom:32px;">'
+            f'<div style="display:flex;flex-direction:column;align-items:center;min-width:40px;">'
+            f'<div style="width:40px;height:40px;border-radius:50%;background:{dot_bg};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">{job["logo"]}</div>'
+            f'{connector}'
+            f'</div>'
+            f'<div style="flex:1;background:{card_bg};border:1px solid {border_color};border-radius:14px;padding:22px 26px;margin-bottom:8px;">'
+            f'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">'
+            f'<span style="font-family:Comic Sans MS,cursive;font-size:19px;font-weight:700;color:{text_main};">{job["role"]}</span>'
+            f'{badge}'
+            f'</div>'
+            f'<div style="font-size:15px;color:{accent};font-weight:600;font-family:Comic Sans MS,cursive;margin-bottom:4px;">{job["company"]}</div>'
+            f'<div style="font-size:13px;color:{text_muted};font-family:JetBrains Mono,monospace;margin-bottom:16px;">📅 {job["period"]}</div>'
+            f'<ul style="margin:0 0 16px 0;padding-left:20px;">{bullets}</ul>'
+            f'<div style="display:flex;flex-wrap:wrap;gap:6px;">{job_chips}</div>'
+            f'</div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+
+    # ── Education ──
+    st.markdown(f'<div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin:16px 0 20px 0;font-family:Comic Sans MS,cursive;">🎓 Education</div>', unsafe_allow_html=True)
+
+    for edu in EDUCATION:
+        note_html = f'<div style="font-size:13px;color:{text_muted};font-family:Comic Sans MS,cursive;">{edu["note"]}</div>' if edu["note"] else ""
+        st.markdown(
+            f'<div style="background:{card_bg};border:1px solid {card_border};border-left:3px solid {accent};border-radius:10px;padding:16px 20px;margin-bottom:12px;">'
+            f'<div style="font-size:16px;font-weight:700;color:{text_main};font-family:Comic Sans MS,cursive;margin-bottom:4px;">{edu["degree"]}</div>'
+            f'<div style="font-size:14px;color:{accent};font-weight:600;font-family:Comic Sans MS,cursive;margin-bottom:4px;">{edu["school"]}</div>'
+            f'<div style="font-size:12px;color:{text_muted};font-family:JetBrains Mono,monospace;margin-bottom:{"6px" if edu["note"] else "0"};">📅 {edu["period"]}</div>'
+            f'{note_html}'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+
+
+# ── TAB 3: RESUME ──────────────────────────────────────────────────────────────
 with resume_tab:
     if os.path.exists(RESUME_PATH):
         with open(RESUME_PATH, "rb") as f:
@@ -583,19 +726,10 @@ with projects_tab:
             "status": "Live",
         },
         {
-            "title": "Resume Parser",
-            "description": "An intelligent resume parsing system powered by AWS Bedrock Claude and structured output validation. Extract structured candidate information from PDF resumes with high accuracy using AI.",
-            "banner": "https://images.unsplash.com/photo-1698047681432-006d2449c631?w=1200&q=80",
+            "title": "LLM Evaluation Framework",
+            "description": "An end-to-end framework for evaluating large language model outputs across accuracy, hallucination rate, and latency. Designed for enterprise GenAI deployments.",
+            "banner": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80",
             "tags": ["Python", "OpenAI", "Pandas", "AWS"],
-            "github_url": "https://github.com/hargurjeet/resume-parser",
-            "live_url": "https://huggingface.co/spaces/Hargurjeet/Resume_parser",
-            "status": "Live",
-        },
-        {
-            "title": "ML Recommendation Engine",
-            "description": "A multi-label recommendation system using Random Forest and XGBoost that increased premium product sales by 10%. Built for scale on GCP with real-time inference.",
-            "banner": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
-            "tags": ["XGBoost", "Scikit-learn", "GCP", "Docker"],
             "github_url": "https://github.com",
             "live_url": "https://yourapp.streamlit.app",
             "status": "Live",
