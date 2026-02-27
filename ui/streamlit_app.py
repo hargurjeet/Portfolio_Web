@@ -314,7 +314,7 @@ with st.sidebar:
 
     # Core stack chips
     st.markdown(f'<div style="font-size:11px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:8px;font-family:Comic Sans MS,cursive;padding:0 6px;">Core Stack</div>', unsafe_allow_html=True)
-    skills = ["RAG", "Guardrails", "Multi Agents orchestrations", "Observability", "FastAPI", "Docker", "MLOps", "XGBoost", "CrewAI", "CI/CD"]
+    skills = ["LangChain", "RAG", "LLMs", "Python", "AWS Bedrock", "FastAPI", "FAISS", "MLOps", "XGBoost", "CrewAI"]
     chips_html = '<div style="display:flex;flex-wrap:wrap;gap:6px;padding:0 6px;">' + "".join(
         f'<span style="background:{tag_bg};color:{text_muted};font-size:11px;font-family:JetBrains Mono,monospace;padding:3px 8px;border-radius:4px;">{s}</span>'
         for s in skills
@@ -387,10 +387,6 @@ with chat_tab:
         for i, msg in enumerate(st.session_state.messages):
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
-                if msg["role"] == "assistant" and i in st.session_state.sources:
-                    with st.expander("📎 Sources"):
-                        for j, src in enumerate(st.session_state.sources[i]):
-                            st.markdown(f"`[{j+1}]` {src['source']} — page {src['page']}")
 
     if not st.session_state.messages:
         suggestions = [
@@ -443,11 +439,6 @@ with chat_tab:
                                 sources = data["sources"]
 
                         token_placeholder.markdown(full_answer)
-
-                        if sources:
-                            with st.expander("📎 Sources"):
-                                for j, src in enumerate(sources):
-                                    st.markdown(f"`[{j+1}]` {src['source']} — page {src['page']}")
 
                 assistant_idx = len(st.session_state.messages)
                 st.session_state.messages.append({"role": "assistant", "content": full_answer})
@@ -730,6 +721,15 @@ with projects_tab:
             "description": "An end-to-end framework for evaluating large language model outputs across accuracy, hallucination rate, and latency. Designed for enterprise GenAI deployments.",
             "banner": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80",
             "tags": ["Python", "OpenAI", "Pandas", "AWS"],
+            "github_url": "https://github.com",
+            "live_url": "https://yourapp.streamlit.app",
+            "status": "Live",
+        },
+        {
+            "title": "ML Recommendation Engine",
+            "description": "A multi-label recommendation system using Random Forest and XGBoost that increased premium product sales by 10%. Built for scale on GCP with real-time inference.",
+            "banner": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+            "tags": ["XGBoost", "Scikit-learn", "GCP", "Docker"],
             "github_url": "https://github.com",
             "live_url": "https://yourapp.streamlit.app",
             "status": "Live",
