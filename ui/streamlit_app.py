@@ -725,15 +725,6 @@ with projects_tab:
             "live_url": "https://yourapp.streamlit.app",
             "status": "Live",
         },
-        {
-            "title": "ML Recommendation Engine",
-            "description": "A multi-label recommendation system using Random Forest and XGBoost that increased premium product sales by 10%. Built for scale on GCP with real-time inference.",
-            "banner": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
-            "tags": ["XGBoost", "Scikit-learn", "GCP", "Docker"],
-            "github_url": "https://github.com",
-            "live_url": "https://yourapp.streamlit.app",
-            "status": "Live",
-        },
     ]
 
     st.markdown(f'<div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:24px;margin-top:8px;font-family:Comic Sans MS,cursive;">🚀 Deployed Projects</div>', unsafe_allow_html=True)
