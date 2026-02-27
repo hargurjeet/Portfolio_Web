@@ -239,6 +239,31 @@ hr {{ border-color: {hr_color} !important; margin: 16px 0; }}
     font-family: 'Comic Sans MS', cursive !important;
     color: {text_body};
 }}
+
+/* ── Typing indicator ── */
+.thinking-dots {{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 2px;
+}}
+.thinking-dots span {{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: {accent};
+    display: inline-block;
+    animation: bounce 1.2s infinite ease-in-out;
+}}
+.thinking-dots span:nth-child(1) {{ animation-delay: 0s; }}
+.thinking-dots span:nth-child(2) {{ animation-delay: 0.2s; }}
+.thinking-dots span:nth-child(3) {{ animation-delay: 0.4s; }}
+@keyframes bounce {{
+    0%, 80%, 100% {{ transform: scale(0.6); opacity: 0.4; }}
+    40% {{ transform: scale(1.0); opacity: 1; }}
+}}
+
+/* ── Follow-up chips ── */
 </style>
 """, unsafe_allow_html=True)
 
@@ -388,6 +413,7 @@ with chat_tab:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
+    # ── Suggestion buttons (only when no messages) ──
     if not st.session_state.messages:
         suggestions = [
             "What's his GenAI experience?",
@@ -417,10 +443,20 @@ with chat_tab:
                 response.raise_for_status()
                 full_answer = ""
                 sources = []
+                got_first_token = False
 
                 with chat_container:
                     with st.chat_message("assistant"):
                         token_placeholder = st.empty()
+
+                        # ── Thinking indicator ──
+                        token_placeholder.markdown(
+                            f'<div style="display:inline-flex;align-items:center;gap:8px;font-family:Comic Sans MS,cursive;font-size:15px;color:{text_muted};">'
+                            f'<span>Thinking</span>'
+                            f'<div class="thinking-dots"><span></span><span></span><span></span></div>'
+                            f'</div>',
+                            unsafe_allow_html=True
+                        )
 
                         for line in response.iter_lines():
                             if not line:
@@ -433,6 +469,8 @@ with chat_tab:
                                 break
                             data = json.loads(payload)
                             if "token" in data:
+                                if not got_first_token:
+                                    got_first_token = True
                                 full_answer += data["token"]
                                 token_placeholder.markdown(full_answer + "▌")
                             if "sources" in data:
@@ -708,21 +746,30 @@ with projects_tab:
 
     PROJECTS = [
         {
-            "title": "Finance Planner",
-            "description": "An AI-powered retirement planning tool built with CrewAI and AWS Bedrock.",
+            "title": "Portfolio AI Chatbot",
+            "description": "A production-ready RAG-powered chatbot built with LangChain, FAISS, FastAPI and Streamlit. Answers questions about my experience using GPT-4o-mini with conversational memory and streaming responses.",
             "banner": "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80",
             "tags": ["LangChain", "FastAPI", "Streamlit", "FAISS", "GPT-4o-mini"],
-            "github_url": "https://github.com/hargurjeet/Finance_Planner",
+            "github_url": "https://github.com",
             "live_url": "https://yourapp.streamlit.app",
             "status": "Live",
         },
         {
-            "title": "Resume Parser",
-            "description": "An intelligent resume parsing system powered by AWS Bedrock Claude and structured output validation. Extract structured candidate information from PDF resumes with high accuracy using AI.",
-            "banner": "https://images.unsplash.com/photo-1698047681432-006d2449c631?w=1200&q=80",
+            "title": "LLM Evaluation Framework",
+            "description": "An end-to-end framework for evaluating large language model outputs across accuracy, hallucination rate, and latency. Designed for enterprise GenAI deployments.",
+            "banner": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80",
             "tags": ["Python", "OpenAI", "Pandas", "AWS"],
-            "github_url": "https://github.com/hargurjeet/resume-parser",
-            "live_url": "https://huggingface.co/spaces/Hargurjeet/Resume_parser",
+            "github_url": "https://github.com",
+            "live_url": "https://yourapp.streamlit.app",
+            "status": "Live",
+        },
+        {
+            "title": "ML Recommendation Engine",
+            "description": "A multi-label recommendation system using Random Forest and XGBoost that increased premium product sales by 10%. Built for scale on GCP with real-time inference.",
+            "banner": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+            "tags": ["XGBoost", "Scikit-learn", "GCP", "Docker"],
+            "github_url": "https://github.com",
+            "live_url": "https://yourapp.streamlit.app",
             "status": "Live",
         },
     ]
