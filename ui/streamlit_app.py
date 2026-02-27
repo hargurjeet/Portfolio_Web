@@ -583,12 +583,12 @@ with projects_tab:
             "status": "Live",
         },
         {
-            "title": "LLM Evaluation Framework",
-            "description": "An end-to-end framework for evaluating large language model outputs across accuracy, hallucination rate, and latency. Designed for enterprise GenAI deployments.",
-            "banner": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80",
+            "title": "Resume Parser",
+            "description": "An intelligent resume parsing system powered by AWS Bedrock Claude and structured output validation. Extract structured candidate information from PDF resumes with high accuracy using AI.",
+            "banner": "https://images.unsplash.com/photo-1698047681432-006d2449c631?w=1200&q=80",
             "tags": ["Python", "OpenAI", "Pandas", "AWS"],
-            "github_url": "https://github.com",
-            "live_url": "https://yourapp.streamlit.app",
+            "github_url": "https://github.com/hargurjeet/resume-parser",
+            "live_url": "https://huggingface.co/spaces/Hargurjeet/Resume_parser",
             "status": "Live",
         },
         {
