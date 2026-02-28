@@ -5,7 +5,7 @@ import json
 import os
 
 API_URL = os.getenv("API_URL", "http://localhost:8000/api/v1/chat")
-RESUME_PATH = "data/Hargurjeet_Lead_GenAI_Specialist.pdf"
+RESUME_PATH = "data/Hargurjeet_Singh_Ganger_KnowledgeBase.pdf"
 
 st.set_page_config(
     page_title="Hargurjeet · AI Assistant",
