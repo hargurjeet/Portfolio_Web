@@ -264,6 +264,16 @@ hr {{ border-color: {hr_color} !important; margin: 16px 0; }}
 }}
 
 /* ── Follow-up chips ── */
+
+/* ── Hide sidebar collapse button ── */
+[data-testid="stSidebarCollapseButton"] {{
+    display: none !important;
+}}
+button[title="keyboard_double_arrow_left"],
+button[title="keyboard_double_arrow_right"] {{
+    display: none !important;
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
