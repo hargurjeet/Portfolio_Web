@@ -763,7 +763,7 @@ with projects_tab:
             "title": "Finance Planner",
             "description": "An AI-powered retirement planning tool built with CrewAI and AWS Bedrock.",
             "banner": "https://plus.unsplash.com/premium_photo-1723802573606-f3828a8975c8?w=1200&q=80",
-            "tags": ["LangChain", "FastAPI", "Streamlit", "FAISS", "GPT-4o-mini"],
+            "tags": ["Crewai", "FastAPI", "Streamlit", "Multi Agent Orchestration", "GPT-4o-mini", "Tool Calling"],
             "github_url": "https://github.com/hargurjeet/Finance_Planner",
             "live_url": "https://yourapp.streamlit.app",
             "status": "Live",
