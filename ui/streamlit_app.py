@@ -6,16 +6,14 @@ import os
 
 API_URL = os.getenv("API_URL", "http://localhost:8000/api/v1/chat")
 RESUME_PATH = "data/Hargurjeet_Singh_Ganger_KnowledgeBase.pdf"
+AVATAR_PATH = "data/my_avatar.png"
 
 st.set_page_config(
     page_title="Hargurjeet · AI Assistant",
     page_icon="⚡",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
-
-if "sidebar_state" not in st.session_state:
-    st.session_state.sidebar_state = "expanded"
 
 # ── THEME STATE ────────────────────────────────────────────────────────────────
 if "dark_mode" not in st.session_state:
@@ -26,7 +24,7 @@ dark = st.session_state.dark_mode
 # ── THEME VARIABLES ────────────────────────────────────────────────────────────
 if dark:
     bg          = "#0f0f0f"
-    sidebar_bg  = "#141414"
+    topbar_bg   = "#141414"
     card_bg     = "#1a1a1a"
     card_border = "#252525"
     text_main   = "#f0f0f0"
@@ -47,12 +45,12 @@ if dark:
     blog_bdr    = "#222222"
     project_bg  = "#141414"
     toggle_icon = "☀️"
-    toggle_lbl  = "Light Mode"
+    toggle_lbl  = "Light"
     scrollbar_track = "#0f0f0f"
     scrollbar_thumb = "#333333"
 else:
     bg          = "#f5f5f0"
-    sidebar_bg  = "#ffffff"
+    topbar_bg   = "#ffffff"
     card_bg     = "#ffffff"
     card_border = "#e0e0e0"
     text_main   = "#1a1a1a"
@@ -73,11 +71,19 @@ else:
     blog_bdr    = "#e0e0e0"
     project_bg  = "#ffffff"
     toggle_icon = "🌙"
-    toggle_lbl  = "Dark Mode"
+    toggle_lbl  = "Dark"
     scrollbar_track = "#f5f5f0"
     scrollbar_thumb = "#cccccc"
 
 accent = "#ff5733"
+
+# ── AVATAR ─────────────────────────────────────────────────────────────────────
+if os.path.exists(AVATAR_PATH):
+    with open(AVATAR_PATH, "rb") as img_file:
+        avatar_b64 = base64.b64encode(img_file.read()).decode("utf-8")
+    avatar_html = f'<img src="data:image/png;base64,{avatar_b64}" style="width:62px;height:62px;border-radius:50%;object-fit:cover;border:3px solid {accent};box-shadow:0 0 0 4px rgba(255,87,51,0.15);">'
+else:
+    avatar_html = f'<div style="width:62px;height:62px;background:linear-gradient(135deg,#ff5733,#ff8c42);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;font-family:Comic Sans MS,cursive;flex-shrink:0;">H</div>'
 
 # ── CUSTOM CSS ─────────────────────────────────────────────────────────────────
 st.markdown(f"""
@@ -88,36 +94,236 @@ html, body, [class*="css"] {{
     -webkit-font-smoothing: antialiased;
 }}
 
+/* Hide sidebar entirely */
+[data-testid="stSidebar"] {{
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    min-width: 0 !important;
+}}
+[data-testid="collapsedControl"] {{ display: none !important; }}
+[data-testid="stSidebarCollapseButton"] {{ display: none !important; }}
+
 .stApp {{
     background-color: {bg};
     color: {text_body};
 }}
 
-[data-testid="stSidebar"] {{
-    background-color: {sidebar_bg};
-    border-right: 1px solid {hr_color};
-    display: block !important;
-    visibility: visible !important;
-    min-width: 270px !important;
-    max-width: 270px !important;
-    transform: none !important;
-}}
-[data-testid="stSidebar"] * {{
-    color: {text_body} !important;
-    font-family: 'Comic Sans MS', 'Comic Sans', cursive !important;
-}}
-
+/* Remove default Streamlit top padding so topbar sits flush */
+.stApp > header {{ display: none !important; }}
 #MainMenu, footer {{ visibility: hidden; }}
 header[data-testid="stHeader"] {{
     background: transparent !important;
-    height: 0 !important; min-height: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
     visibility: hidden !important;
 }}
 [data-testid="stToolbar"] {{ display: none !important; }}
 .stDeployButton {{ display: none !important; }}
-[data-testid="collapsedControl"] {{ display: none !important; }}
 button[kind="header"] {{ display: none !important; }}
 
+/* Remove top padding on main block */
+.block-container {{
+    padding-top: 0 !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+}}
+
+/* ── TOPBAR ── */
+.topbar {{
+    background: {topbar_bg};
+    border-bottom: 1px solid {hr_color};
+    padding: 0 4px;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    box-shadow: 0 1px 12px rgba(0,0,0,0.06);
+    margin-left: -24px;
+    margin-right: -24px;
+    margin-bottom: 0;
+}}
+.topbar-row1 {{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 24px 14px 24px;
+    border-bottom: 1px solid {hr_color};
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}}
+.topbar-row2 {{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 24px;
+    overflow: hidden;
+}}
+.tb-identity {{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}}
+.tb-name {{
+    font-family: Comic Sans MS, cursive;
+    font-size: 24px;
+    font-weight: 700;
+    color: {text_main};
+    line-height: 1;
+    white-space: nowrap;
+}}
+.tb-title {{
+    font-size: 12px;
+    color: {accent};
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 5px;
+    white-space: nowrap;
+}}
+.tb-vdiv {{
+    width: 1px;
+    height: 44px;
+    background: {hr_color};
+    flex-shrink: 0;
+}}
+.tb-stats {{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: nowrap;
+}}
+.stat-chip {{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: {tag_bg};
+    border: 1px solid {card_border};
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-size: 14px;
+    white-space: nowrap;
+    font-family: Comic Sans MS, cursive;
+}}
+.stat-lbl {{ color: {text_muted}; }}
+.stat-val {{ color: {accent}; font-weight: 700; }}
+.tb-links {{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}}
+/* LinkedIn — blue filled */
+.tb-link-li {{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    background: #0077b5;
+    color: #fff !important;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    font-family: Comic Sans MS, cursive;
+    white-space: nowrap;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,119,181,0.3);
+}}
+.tb-link-li:hover {{ background: #005f8e; box-shadow: 0 4px 14px rgba(0,119,181,0.45); transform: translateY(-1px); }}
+/* GitHub — dark filled */
+.tb-link-gh {{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    background: {"#1a1a1a" if not dark else "#333"};
+    color: #fff !important;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    font-family: Comic Sans MS, cursive;
+    white-space: nowrap;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}}
+.tb-link-gh:hover {{ background: #333; box-shadow: 0 4px 14px rgba(0,0,0,0.4); transform: translateY(-1px); }}
+/* Email — accent filled */
+.tb-link-em {{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    background: {accent};
+    color: #fff !important;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    font-family: Comic Sans MS, cursive;
+    white-space: nowrap;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(255,87,51,0.3);
+}}
+.tb-link-em:hover {{ background: #e04a20; box-shadow: 0 4px 14px rgba(255,87,51,0.45); transform: translateY(-1px); }}
+/* Theme toggle — native button styled to match topbar pills */
+.tb-toggle {{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 18px;
+    border-radius: 10px;
+    background: {tag_bg};
+    color: {text_body};
+    border: 1.5px solid {card_border};
+    font-size: 14px;
+    font-weight: 700;
+    font-family: Comic Sans MS, cursive;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    flex-shrink: 0;
+    outline: none;
+}}
+.tb-toggle:hover {{
+    border-color: {accent};
+    color: {accent};
+    background: {hover_bg};
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transform: translateY(-1px);
+}}
+.skills-label {{
+    font-size: 10px;
+    color: {text_dim};
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    font-family: Comic Sans MS, cursive;
+    flex-shrink: 0;
+    font-weight: 700;
+}}
+.skills-scroll {{
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+    align-items: center;
+}}
+.skills-scroll::-webkit-scrollbar {{ display: none; }}
+.skill-tag {{
+    background: {tag_bg};
+    color: {text_muted};
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    white-space: nowrap;
+    border: 1px solid {card_border};
+    font-family: Comic Sans MS, cursive;
+}}
+
+/* ── TABS ── */
 .stTabs [data-baseweb="tab-list"] {{
     background-color: {tab_bg};
     border-radius: 12px;
@@ -139,6 +345,7 @@ button[kind="header"] {{ display: none !important; }}
     color: #fff !important;
 }}
 
+/* ── CHAT ── */
 [data-testid="stChatMessage"] {{
     background-color: {card_bg} !important;
     border: 1px solid {card_border};
@@ -166,24 +373,44 @@ button[kind="header"] {{ display: none !important; }}
     box-shadow: 0 0 0 2px rgba(255, 87, 51, 0.15) !important;
 }}
 
-[data-testid="stExpander"] {{
-    background-color: {expander_bg} !important;
-    border: 1px solid {card_border} !important;
-    border-radius: 10px !important;
+/* ── SUGGESTION BUTTONS ── */
+.suggestion-row {{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
 }}
-[data-testid="stExpander"] summary {{
-    font-size: 14px !important;
-    color: {text_muted} !important;
-    font-family: 'JetBrains Mono', monospace !important;
+.suggestion-btn {{
+    flex: 1;
+    min-width: 180px;
+    padding: 12px 18px;
+    background: {card_bg};
+    border: 1px solid {card_border};
+    border-radius: 24px;
+    font-size: 14px;
+    color: {text_body};
+    font-family: Comic Sans MS, cursive;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}}
+.suggestion-btn:hover {{
+    border-color: {accent};
+    color: {accent};
+    background: {hover_bg};
 }}
 
+/* Keep Streamlit buttons styled for suggestion chips */
 div[data-testid="stHorizontalBlock"] .stButton > button {{
     background-color: {card_bg} !important;
-    color: {text_muted} !important;
+    color: {text_body} !important;
     border: 1px solid {card_border} !important;
-    border-radius: 20px !important;
-    font-size: 15px !important;
-    padding: 10px 18px !important;
+    border-radius: 24px !important;
+    font-size: 14px !important;
+    padding: 12px 18px !important;
     font-family: 'Comic Sans MS', cursive !important;
     transition: all 0.2s ease;
 }}
@@ -221,6 +448,36 @@ div[data-testid="stHorizontalBlock"] .stButton > button:hover {{
     padding: 12px;
 }}
 
+/* ── CLEAR CHAT BUTTON — compact, sits in chat pane ── */
+.clear-pill > button {{
+    background-color: transparent !important;
+    color: {text_dim} !important;
+    border: 1px solid {card_border} !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    padding: 5px 12px !important;
+    width: auto !important;
+    font-family: Comic Sans MS, cursive !important;
+    transition: all 0.15s !important;
+}}
+.clear-pill > button:hover {{
+    border-color: #e05a4a !important;
+    color: #e05a4a !important;
+    background: rgba(224,90,74,0.05) !important;
+}}
+
+/* toggle-pill removed — now using .tb-toggle HTML link */
+
+[data-testid="stExpander"] {{
+    background-color: {expander_bg} !important;
+    border: 1px solid {card_border} !important;
+    border-radius: 10px !important;
+}}
+[data-testid="stExpander"] summary {{
+    font-size: 14px !important;
+    color: {text_muted} !important;
+}}
+
 hr {{ border-color: {hr_color} !important; margin: 16px 0; }}
 
 ::-webkit-scrollbar {{ width: 4px; }}
@@ -228,19 +485,12 @@ hr {{ border-color: {hr_color} !important; margin: 16px 0; }}
 ::-webkit-scrollbar-thumb {{ background: {scrollbar_thumb}; border-radius: 4px; }}
 ::-webkit-scrollbar-thumb:hover {{ background: {accent}; }}
 
-[data-testid="stSpinner"] {{ color: {accent} !important; }}
-
-.stCaption, [data-testid="stCaptionContainer"] {{
-    color: {text_dim} !important;
-    font-size: 13px !important;
-}}
-
 .stMarkdown, .stMarkdown p, .stMarkdown li {{
     font-family: 'Comic Sans MS', cursive !important;
     color: {text_body};
 }}
 
-/* ── Typing indicator ── */
+/* Typing indicator */
 .thinking-dots {{
     display: inline-flex;
     align-items: center;
@@ -262,121 +512,75 @@ hr {{ border-color: {hr_color} !important; margin: 16px 0; }}
     0%, 80%, 100% {{ transform: scale(0.6); opacity: 0.4; }}
     40% {{ transform: scale(1.0); opacity: 1; }}
 }}
-
-/* ── Follow-up chips ── */
-
-/* ── Hide sidebar collapse button ── */
-[data-testid="stSidebarCollapseButton"] {{
-    display: none !important;
-}}
-button[title="keyboard_double_arrow_left"],
-button[title="keyboard_double_arrow_right"] {{
-    display: none !important;
-}}
-
 </style>
 """, unsafe_allow_html=True)
 
 
-# ── SIDEBAR ────────────────────────────────────────────────────────────────────
-AVATAR_PATH = "data/my_avatar.png"
+# ── HORIZONTAL TOPBAR ─────────────────────────────────────────────────────────
+skills = ["LangChain", "RAG", "LLMs", "Python", "AWS Bedrock", "FastAPI", "FAISS", "MLOps", "XGBoost", "CrewAI"]
+chips_html = "".join(
+    f'<span class="skill-tag">{s}</span>' for s in skills
+)
 
-with st.sidebar:
-    # Read and encode the photo
-    if os.path.exists(AVATAR_PATH):
-        with open(AVATAR_PATH, "rb") as img_file:
-            avatar_b64 = base64.b64encode(img_file.read()).decode("utf-8")
-        avatar_html = f'<img src="data:image/png;base64,{avatar_b64}" style="width:180px;height:180px;border-radius:50%;object-fit:cover;border:3px solid {accent};box-shadow:0 6px 24px rgba(255,87,51,0.3);">'
-    else:
-        # Fallback to letter avatar if photo not found
-        avatar_html = f'<div style="width:180px;height:180px;background:linear-gradient(135deg,#ff5733,#ff8c42);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:700;color:#fff;font-family:Comic Sans MS,cursive;">H</div>'
-
-    st.markdown(f"""
-    <div style="text-align: center; padding: 28px 0 20px 0;">
-        <div style="margin: 0 auto 16px auto; width:180px;">
-            {avatar_html}
-        </div>
-        <div style="font-family: Comic Sans MS, cursive; font-size: 21px; color: {text_main}; margin-bottom: 6px; font-weight: 700;">
-            Hargurjeet Singh
-        </div>
-        <div style="font-size: 12px; color: {accent}; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; font-family: Comic Sans MS, cursive;">
-            Lead GenAI Specialist
-        </div>
+st.markdown(f"""
+<div class="topbar">
+  <!-- Row 1: identity + stats + links -->
+  <div class="topbar-row1">
+    <!-- Identity -->
+    <div class="tb-identity">
+      {avatar_html}
+      <div>
+        <div class="tb-name">Hargurjeet Singh</div>
+        <div class="tb-title">Lead GenAI Specialist</div>
+      </div>
     </div>
-    """, unsafe_allow_html=True)
+    <div class="tb-vdiv"></div>
+    <!-- Stats -->
+    <div class="tb-stats">
+      <span class="stat-chip">🏢 <span class="stat-lbl">Exp</span>&nbsp;<span class="stat-val">15+ yrs</span></span>
+      <span class="stat-chip">📍 <span class="stat-lbl">Loc</span>&nbsp;<span class="stat-val">Bangalore</span></span>
+      <span class="stat-chip">🎓 <span class="stat-lbl">Degree</span>&nbsp;<span class="stat-val">M.S. ML & AI</span></span>
+      <span class="stat-chip">☁️ <span class="stat-lbl">Cloud</span>&nbsp;<span class="stat-val">AWS · GCP</span></span>
+    </div>
+    <div class="tb-vdiv"></div>
+    <!-- Connect links -->
+    <div class="tb-links">
+      <a href="https://www.linkedin.com/in/hargurjeet/" target="_blank" class="tb-link-li">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        LinkedIn
+      </a>
+      <a href="https://github.com/hargurjeet" target="_blank" class="tb-link-gh">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        GitHub
+      </a>
+      <a href="mailto:gurjeet333@gmail.com" class="tb-link-em">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 010 19.366V5.457c0-.49.218-.93.558-1.231L12 13.09 23.442 4.226c.34.302.558.741.558 1.231z"/></svg>
+        Email
+      </a>
+    </div>
+    <div class="tb-vdiv"></div>
+    <!-- Theme toggle: JS clicks a hidden Streamlit button — no page navigation -->
+    
+  </div>
+  <!-- Row 2: skills -->
+  <div class="topbar-row2">
+    <span class="skills-label">Stack</span>
+    <div class="skills-scroll">{chips_html}</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown("<hr>", unsafe_allow_html=True)
+# ── Clean Theme Toggle Button (No JS) ─────────────────────────────
+toggle_col1, toggle_col2 = st.columns([9, 1])
 
-    # ── THEME TOGGLE BUTTON ────────────────────────────────────────────────────
-    if st.button(f"{toggle_icon}  {toggle_lbl}"):
+with toggle_col2:
+    if st.button(f"{toggle_icon}  {toggle_lbl}", key="theme_toggle_top"):
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
 
-    st.markdown("<hr>", unsafe_allow_html=True)
-
-    st.markdown(f"""
-    <div style="padding: 0 6px;">
-        <div style="font-size: 11px; color: {text_dim}; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px; font-weight: 700; font-family: Comic Sans MS, cursive;">Connect</div>
-        <a href="https://www.linkedin.com/in/hargurjeet/" target="_blank" style="display:flex;align-items:center;gap:12px;color:{text_muted};text-decoration:none;font-size:15px;padding:10px 12px;border-radius:10px;font-family:Comic Sans MS,cursive;margin-bottom:4px;" onmouseover="this.style.background='{hover_bg}'" onmouseout="this.style.background='transparent'">
-            🔗 &nbsp;LinkedIn
-        </a>
-        <a href="https://github.com/hargurjeet" target="_blank" style="display:flex;align-items:center;gap:12px;color:{text_muted};text-decoration:none;font-size:15px;padding:10px 12px;border-radius:10px;font-family:Comic Sans MS,cursive;margin-bottom:4px;" onmouseover="this.style.background='{hover_bg}'" onmouseout="this.style.background='transparent'">
-            🐙 &nbsp;GitHub
-        </a>
-        <a href="mailto:gurjeet333@gmail.com" style="display:flex;align-items:center;gap:12px;color:{text_muted};text-decoration:none;font-size:15px;padding:10px 12px;border-radius:10px;font-family:Comic Sans MS,cursive;" onmouseover="this.style.background='{hover_bg}'" onmouseout="this.style.background='transparent'">
-            ✉️ &nbsp;Email
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("<hr>", unsafe_allow_html=True)
-
-    # Profile label
-    st.markdown(f'<div style="font-size:11px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;font-weight:700;font-family:Comic Sans MS,cursive;padding:0 6px;">Profile</div>', unsafe_allow_html=True)
-
-    # Stat rows - each as its own call to avoid f-string conflicts
-    for icon, label, value in [
-        ("🏢", "Experience", "15+ years"),
-        ("📍", "Location", "Bangalore"),
-        ("🎓", "Degree", "M.S. ML & AI"),
-        ("☁️", "Cloud", "AWS · GCP"),
-    ]:
-        st.markdown(
-            f'<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px;">'
-            f'<span style="color:{text_muted};font-size:14px;font-family:Comic Sans MS,cursive;">{icon} {label}</span>'
-            f'<span style="color:{accent};font-weight:700;font-size:14px;font-family:Comic Sans MS,cursive;">{value}</span>'
-            f'</div>',
-            unsafe_allow_html=True
-        )
-
-    st.markdown(f'<div style="border-top:1px solid {hr_color};margin:12px 6px;"></div>', unsafe_allow_html=True)
-
-    # Core stack chips
-    st.markdown(f'<div style="font-size:11px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:8px;font-family:Comic Sans MS,cursive;padding:0 6px;">Core Stack</div>', unsafe_allow_html=True)
-    skills = ["LangChain", "RAG", "LLMs", "Python", "AWS Bedrock", "FastAPI", "FAISS", "MLOps", "XGBoost", "CrewAI"]
-    chips_html = '<div style="display:flex;flex-wrap:wrap;gap:6px;padding:0 6px;">' + "".join(
-        f'<span style="background:{tag_bg};color:{text_muted};font-size:11px;font-family:JetBrains Mono,monospace;padding:3px 8px;border-radius:4px;">{s}</span>'
-        for s in skills
-    ) + '</div>'
-    st.markdown(chips_html, unsafe_allow_html=True)
-
-    st.markdown("<hr>", unsafe_allow_html=True)
-
-    if st.button("🗑️  Clear Conversation"):
-        st.session_state.messages = []
-        st.session_state.sources = {}
-        st.rerun()
-
-    st.markdown(f"""
-    <div style="text-align:center;margin-top:20px;font-size:12px;color:{text_dim};font-family:Comic Sans MS,cursive;">
-        Powered by GPT-4o-mini · LangChain · FAISS
-    </div>
-    """, unsafe_allow_html=True)
-
-
 # ── PAGE HEADER ────────────────────────────────────────────────────────────────
 st.markdown(f"""
-<div style="padding: 36px 0 24px 0;">
+<div style="padding: 28px 0 20px 0;">
     <div style="font-family: Comic Sans MS, cursive; font-size: 46px; color: {text_main}; line-height: 1.1; font-weight: 700;">
         Ask me anything
     </div>
@@ -387,7 +591,9 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── TABS ───────────────────────────────────────────────────────────────────────
-chat_tab, experience_tab, resume_tab, blogs_tab, projects_tab = st.tabs(["💬  Chat", "🧭  Experience", "📄  Resume", "✍️  Blogs", "🚀  Projects"])
+chat_tab, experience_tab, resume_tab, blogs_tab, projects_tab = st.tabs(
+    ["💬  Chat", "🧭  Experience", "📄  Resume", "✍️  Blogs", "🚀  Projects"]
+)
 
 
 # ── TAB 1: CHAT ────────────────────────────────────────────────────────────────
@@ -408,106 +614,169 @@ with chat_tab:
                 history.append([msgs[i]["content"], msgs[i + 1]["content"]])
         return history
 
-    chat_container = st.container(height=520)
-    with chat_container:
-        if not st.session_state.messages:
-            st.markdown(f"""
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;gap:12px;">
-                <div style="font-size:44px;">⚡</div>
-                <div style="font-family:Comic Sans MS,cursive;font-size:24px;color:{text_muted};font-weight:700;">
-                    Start a conversation
-                </div>
-                <div style="font-size:16px;color:{text_dim};text-align:center;max-width:340px;line-height:1.7;font-family:Comic Sans MS,cursive;">
-                    Click a suggestion below or type your own question
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+    # ── Two-column layout: chat left, profile right ──
+    profile_col, chat_col = st.columns([2, 3], gap="large")
 
-        for i, msg in enumerate(st.session_state.messages):
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
+    # ── LEFT PANEL: Mini profile card ───────────────────────────────────────────
+    with profile_col:
 
-    # ── Suggestion buttons (only when no messages) ──
-    if not st.session_state.messages:
-        suggestions = [
+        # ── About card with Clear button ──
+        st.markdown(f"""
+        <div style="background:{card_bg};border:1px solid {card_border};border-radius:18px;padding:28px 26px;margin-bottom:18px;">
+        <div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;font-family:Comic Sans MS,cursive;margin-bottom:18px;">
+        🚀 What I Solve
+        </div>
+
+        <ul style="margin:0;padding-left:18px;">
+        <li style="margin-bottom:10px;font-size:15px;color:{text_body};line-height:1.7;font-family:Comic Sans MS,cursive;">
+        Build scalable <span style="color:{accent};font-weight:700;">RAG pipelines</span> for enterprise knowledge systems
+        </li>
+        <li style="margin-bottom:10px;font-size:15px;color:{text_body};line-height:1.7;font-family:Comic Sans MS,cursive;">
+        Architect <span style="color:{accent};font-weight:700;">agent-based workflows</span> with guardrails & evaluation
+        </li>
+        <li style="margin-bottom:10px;font-size:15px;color:{text_body};line-height:1.7;font-family:Comic Sans MS,cursive;">
+        Reduce LLM inference cost via <span style="color:{accent};font-weight:700;">multi-model routing</span>
+        </li>
+        <li style="margin-bottom:10px;font-size:15px;color:{text_body};line-height:1.7;font-family:Comic Sans MS,cursive;">
+        Convert research prototypes into <span style="color:{accent};font-weight:700;">production AI platforms</span>
+        </li>
+        <li style="font-size:15px;color:{text_body};line-height:1.7;font-family:Comic Sans MS,cursive;">
+        Deploy secure GenAI systems on <span style="color:{accent};font-weight:700;">AWS Bedrock</span>
+        </li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown(f"""
+        <div style="background:{card_bg};border:1px solid {card_border};border-radius:18px;padding:28px 26px;">
+
+        <div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;font-family:Comic Sans MS,cursive;margin-bottom:18px;">
+        🎯 Open To
+        </div>
+
+        <div style="font-size:15px;color:{text_body};line-height:1.9;font-family:Comic Sans MS,cursive;">
+        • Lead / Principal GenAI roles<br>
+        • AI Platform Architecture ownership<br>
+        • Enterprise RAG & Agentic system design<br>
+        • Research → Product AI transformation<br>
+        • High-impact GenAI initiatives
+        </div>
+
+        </div>
+        """, unsafe_allow_html=True)
+
+
+    with chat_col:
+        chat_container = st.container(height=520)
+        with chat_container:
+            if not st.session_state.messages:
+                st.markdown(f"""
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:130px;gap:8px;">
+                    <div style="font-size:32px;">⚡</div>
+                    <div style="font-family:Comic Sans MS,cursive;font-size:20px;color:{text_muted};font-weight:700;">
+                        Start a conversation
+                    </div>
+                    <div style="font-size:14px;color:{text_dim};text-align:center;max-width:300px;line-height:1.6;font-family:Comic Sans MS,cursive;">
+                        Click a suggestion below or type your own question
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            for i, msg in enumerate(st.session_state.messages):
+                with st.chat_message(msg["role"]):
+                    st.markdown(msg["content"])
+
+        # Suggestion buttons
+        SUGGESTIONS = [
             "What's his GenAI experience?",
             "What cloud platforms has he used?",
             "What's his most recent role?",
         ]
-        cols = st.columns(len(suggestions))
-        for col, suggestion in zip(cols, suggestions):
+        sug_cols = st.columns(len(SUGGESTIONS))
+        for col, suggestion in zip(sug_cols, SUGGESTIONS):
             with col:
-                if st.button(suggestion, use_container_width=True):
+                if st.button(suggestion, use_container_width=True, key=f"sug_{suggestion}"):
                     st.session_state.preset_question = suggestion
                     st.rerun()
 
-    user_input = st.chat_input("Ask anything about Hargurjeet...")
-    question = user_input or st.session_state.pop("preset_question", None)
+        # Clear button — compact, sits between suggestions and chat input
+        _clr_col, _clr_spacer = st.columns([1, 4])
+        with _clr_col:
+            if st.button("🗑️ Clear chat", key="clear_chat", use_container_width=True):
+                st.session_state.messages = []
+                st.session_state.sources = {}
+                st.rerun()
 
-    if question:
-        chat_history = build_chat_history()
-        st.session_state.messages.append({"role": "user", "content": question})
+        preset = st.session_state.get("preset_question", None)
+        user_input = st.chat_input("Ask anything about Hargurjeet...", key="chat_input")
 
-        try:
-            with requests.post(
-                API_URL,
-                json={"question": question, "chat_history": chat_history},
-                stream=True
-            ) as response:
-                response.raise_for_status()
-                full_answer = ""
-                sources = []
-                got_first_token = False
+        question = user_input
+        if not question and preset:
+            question = preset
+            st.session_state.preset_question = None
 
-                with chat_container:
-                    with st.chat_message("assistant"):
-                        token_placeholder = st.empty()
+        if question:
+            st.session_state.preset_question = None
+            chat_history = build_chat_history()
+            st.session_state.messages.append({"role": "user", "content": question})
 
-                        # ── Thinking indicator ──
-                        token_placeholder.markdown(
-                            f'<div style="display:inline-flex;align-items:center;gap:8px;font-family:Comic Sans MS,cursive;font-size:15px;color:{text_muted};">'
-                            f'<span>Thinking</span>'
-                            f'<div class="thinking-dots"><span></span><span></span><span></span></div>'
-                            f'</div>',
-                            unsafe_allow_html=True
-                        )
+            try:
+                with requests.post(
+                    API_URL,
+                    json={"question": question, "chat_history": chat_history},
+                    stream=True
+                ) as response:
+                    response.raise_for_status()
+                    full_answer = ""
+                    sources = []
+                    got_first_token = False
 
-                        for line in response.iter_lines():
-                            if not line:
-                                continue
-                            line = line.decode("utf-8")
-                            if not line.startswith("data: "):
-                                continue
-                            payload = line[len("data: "):]
-                            if payload == "[DONE]":
-                                break
-                            data = json.loads(payload)
-                            if "token" in data:
-                                if not got_first_token:
-                                    got_first_token = True
-                                full_answer += data["token"]
-                                token_placeholder.markdown(full_answer + "▌")
-                            if "sources" in data:
-                                sources = data["sources"]
+                    with chat_container:
+                        with st.chat_message("assistant"):
+                            token_placeholder = st.empty()
+                            token_placeholder.markdown(
+                                f'<div style="display:inline-flex;align-items:center;gap:8px;font-family:Comic Sans MS,cursive;font-size:15px;color:{text_muted};">'
+                                f'<span>Thinking</span>'
+                                f'<div class="thinking-dots"><span></span><span></span><span></span></div>'
+                                f'</div>',
+                                unsafe_allow_html=True
+                            )
+                            for line in response.iter_lines():
+                                if not line:
+                                    continue
+                                line = line.decode("utf-8")
+                                if not line.startswith("data: "):
+                                    continue
+                                payload = line[len("data: "):]
+                                if payload == "[DONE]":
+                                    break
+                                data = json.loads(payload)
+                                if "token" in data:
+                                    if not got_first_token:
+                                        got_first_token = True
+                                    full_answer += data["token"]
+                                    token_placeholder.markdown(full_answer + "▌")
+                                if "sources" in data:
+                                    sources = data["sources"]
+                            token_placeholder.markdown(full_answer)
 
-                        token_placeholder.markdown(full_answer)
+                    assistant_idx = len(st.session_state.messages)
+                    st.session_state.messages.append({"role": "assistant", "content": full_answer})
+                    st.session_state.sources[assistant_idx] = sources
 
-                assistant_idx = len(st.session_state.messages)
-                st.session_state.messages.append({"role": "assistant", "content": full_answer})
-                st.session_state.sources[assistant_idx] = sources
+            except requests.exceptions.ConnectionError:
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": "⚠️ Could not connect to the API. Make sure FastAPI is running on port 8000."
+                })
+            except Exception as e:
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": f"⚠️ Something went wrong: {str(e)}"
+                })
 
-        except requests.exceptions.ConnectionError:
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": "⚠️ Could not connect to the API. Make sure FastAPI is running on port 8000."
-            })
-        except Exception as e:
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": f"⚠️ Something went wrong: {str(e)}"
-            })
+            st.rerun()
 
-        st.rerun()
 
 
 # ── TAB 2: EXPERIENCE ─────────────────────────────────────────────────────────
@@ -582,28 +851,20 @@ with experience_tab:
         },
     ]
 
-    # ── Timeline ──
     for i, job in enumerate(EXPERIENCE):
         is_current = job["type"] == "current"
         border_color = accent if is_current else (tag_border if not dark else "#333")
         dot_bg = accent if is_current else text_muted
 
-        # Build tag chips
         job_chips = "".join(
-            f'<span style="background:{tag_bg};color:{text_muted};font-size:11px;font-family:JetBrains Mono,monospace;padding:3px 9px;border-radius:4px;margin-right:5px;margin-bottom:4px;display:inline-block;">{t}</span>'
+            f'<span style="background:{tag_bg};color:{text_muted};font-size:11px;font-family:Comic Sans MS,cursive;padding:3px 9px;border-radius:4px;margin-right:5px;margin-bottom:4px;display:inline-block;">{t}</span>'
             for t in job["tags"]
         )
-
-        # Build bullet points
         bullets = "".join(
             f'<li style="font-size:15px;color:{text_body};font-family:Comic Sans MS,cursive;line-height:1.7;margin-bottom:6px;">{h}</li>'
             for h in job["highlights"]
         )
-
-        # Current badge
         badge = f'<span style="background:{accent};color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;font-family:Comic Sans MS,cursive;margin-left:10px;">● Current</span>' if is_current else ""
-
-        # Connector line between timeline dots
         connector = f'<div style="width:2px;flex:1;background:{hr_color};margin-top:8px;"></div>' if i < len(EXPERIENCE) - 1 else ""
 
         st.markdown(
@@ -618,7 +879,7 @@ with experience_tab:
             f'{badge}'
             f'</div>'
             f'<div style="font-size:15px;color:{accent};font-weight:600;font-family:Comic Sans MS,cursive;margin-bottom:4px;">{job["company"]}</div>'
-            f'<div style="font-size:13px;color:{text_muted};font-family:JetBrains Mono,monospace;margin-bottom:16px;">📅 {job["period"]}</div>'
+            f'<div style="font-size:13px;color:{text_muted};font-family:Comic Sans MS,cursive;margin-bottom:16px;">📅 {job["period"]}</div>'
             f'<ul style="margin:0 0 16px 0;padding-left:20px;">{bullets}</ul>'
             f'<div style="display:flex;flex-wrap:wrap;gap:6px;">{job_chips}</div>'
             f'</div>'
@@ -626,7 +887,6 @@ with experience_tab:
             unsafe_allow_html=True
         )
 
-    # ── Education ──
     st.markdown(f'<div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin:16px 0 20px 0;font-family:Comic Sans MS,cursive;">🎓 Education</div>', unsafe_allow_html=True)
 
     for edu in EDUCATION:
@@ -635,7 +895,7 @@ with experience_tab:
             f'<div style="background:{card_bg};border:1px solid {card_border};border-left:3px solid {accent};border-radius:10px;padding:16px 20px;margin-bottom:12px;">'
             f'<div style="font-size:16px;font-weight:700;color:{text_main};font-family:Comic Sans MS,cursive;margin-bottom:4px;">{edu["degree"]}</div>'
             f'<div style="font-size:14px;color:{accent};font-weight:600;font-family:Comic Sans MS,cursive;margin-bottom:4px;">{edu["school"]}</div>'
-            f'<div style="font-size:12px;color:{text_muted};font-family:JetBrains Mono,monospace;margin-bottom:{"6px" if edu["note"] else "0"};">📅 {edu["period"]}</div>'
+            f'<div style="font-size:12px;color:{text_muted};font-family:Comic Sans MS,cursive;margin-bottom:{"6px" if edu["note"] else "0"};">📅 {edu["period"]}</div>'
             f'{note_html}'
             f'</div>',
             unsafe_allow_html=True
@@ -681,7 +941,7 @@ with resume_tab:
         st.error(f"⚠️ Resume not found at `{RESUME_PATH}`.")
 
 
-# ── TAB 3: BLOGS ───────────────────────────────────────────────────────────────
+# ── TAB 4: BLOGS ───────────────────────────────────────────────────────────────
 with blogs_tab:
 
     BLOGS = [
@@ -719,7 +979,7 @@ with blogs_tab:
             bg_b, txt, icon = "#1a3a5c", "#4da6ff", "in"
         else:
             bg_b, txt, icon = "#2a1a1a", "#ff6b4a", "M"
-        return f'<span style="background:{bg_b};color:{txt};font-size:11px;font-weight:700;letter-spacing:0.5px;padding:4px 10px;border-radius:4px;font-family:JetBrains Mono,monospace;">{icon} {platform}</span>'
+        return f'<span style="background:{bg_b};color:{txt};font-size:11px;font-weight:700;letter-spacing:0.5px;padding:4px 10px;border-radius:4px;font-family:Comic Sans MS,cursive;">{icon} {platform}</span>'
 
     featured = BLOGS[0]
     rest = BLOGS[1:]
@@ -728,7 +988,7 @@ with blogs_tab:
 
     st.markdown(f"""
     <a href="{featured['url']}" target="_blank" style="text-decoration:none;">
-        <div style="background:{card_bg};border:1px solid {card_border};border-radius:18px;padding:34px 40px;display:flex;align-items:center;gap:32px;margin-bottom:28px;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='{accent}'" onmouseout="this.style.borderColor='{card_border}'">
+        <div style="background:{card_bg};border:1px solid {card_border};border-radius:18px;padding:34px 40px;display:flex;align-items:center;gap:32px;margin-bottom:28px;cursor:pointer;" onmouseover="this.style.borderColor='{accent}'" onmouseout="this.style.borderColor='{card_border}'">
             <div style="font-size:52px;min-width:80px;height:80px;background:{tag_bg};border-radius:14px;display:flex;align-items:center;justify-content:center;">{featured['emoji']}</div>
             <div style="flex:1;">
                 <div style="margin-bottom:12px;">{platform_badge(featured['platform'])}</div>
@@ -745,7 +1005,7 @@ with blogs_tab:
         a = "#4da6ff" if blog["platform"] == "LinkedIn" else accent
         st.markdown(f"""
         <a href="{blog['url']}" target="_blank" style="text-decoration:none;">
-            <div style="background:{blog_bg};border:1px solid {blog_bdr};border-left:3px solid {a};border-radius:10px;padding:18px 22px;display:flex;align-items:center;gap:16px;margin-bottom:9px;transition:background 0.2s;" onmouseover="this.style.background='{hover_bg}'" onmouseout="this.style.background='{blog_bg}'">
+            <div style="background:{blog_bg};border:1px solid {blog_bdr};border-left:3px solid {a};border-radius:10px;padding:18px 22px;display:flex;align-items:center;gap:16px;margin-bottom:9px;" onmouseover="this.style.background='{hover_bg}'" onmouseout="this.style.background='{blog_bg}'">
                 <div style="font-size:24px;min-width:36px;text-align:center;">{blog['emoji']}</div>
                 <div style="flex:1;font-size:15px;color:{text_body};font-weight:600;line-height:1.5;font-family:Comic Sans MS,cursive;">{blog['title']}</div>
                 <div>{platform_badge(blog['platform'])}</div>
@@ -755,7 +1015,7 @@ with blogs_tab:
         """, unsafe_allow_html=True)
 
 
-# ── TAB 4: PROJECTS ────────────────────────────────────────────────────────────
+# ── TAB 5: PROJECTS ────────────────────────────────────────────────────────────
 with projects_tab:
 
     PROJECTS = [
@@ -784,7 +1044,7 @@ with projects_tab:
     for project in PROJECTS:
         status_color = "#22c55e" if project["status"] == "Live" else "#f59e0b"
         tags_html = "".join([
-            f'<span style="background:{tag_bg};color:{tag_color};font-size:12px;font-family:JetBrains Mono,monospace;padding:4px 12px;border-radius:4px;margin-right:6px;margin-bottom:4px;display:inline-block;">{tag}</span>'
+            f'<span style="background:{tag_bg};color:{tag_color};font-size:12px;font-family:Comic Sans MS,cursive;padding:4px 12px;border-radius:4px;margin-right:6px;margin-bottom:4px;display:inline-block;">{tag}</span>'
             for tag in project["tags"]
         ])
         card = (
