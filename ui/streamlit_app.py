@@ -15,65 +15,30 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ── THEME STATE ────────────────────────────────────────────────────────────────
-if "dark_mode" not in st.session_state:
-    st.session_state.dark_mode = False
-
-dark = st.session_state.dark_mode
-
 # ── THEME VARIABLES ────────────────────────────────────────────────────────────
-if dark:
-    bg          = "#0f0f0f"
-    topbar_bg   = "#141414"
-    card_bg     = "#1a1a1a"
-    card_border = "#252525"
-    text_main   = "#f0f0f0"
-    text_body   = "#e0e0e0"
-    text_muted  = "#888888"
-    text_dim    = "#555555"
-    input_bg    = "#1a1a1a"
-    input_bdr   = "#333333"
-    hr_color    = "#222222"
-    hover_bg    = "#222222"
-    tab_bg      = "#1a1a1a"
-    tab_border  = "#2a2a2a"
-    expander_bg = "#161616"
-    tag_bg      = "#252525"
-    tag_color   = "#888888"
-    tag_border  = "#333333"
-    blog_bg     = "#141414"
-    blog_bdr    = "#222222"
-    project_bg  = "#141414"
-    toggle_icon = "☀️"
-    toggle_lbl  = "Light"
-    scrollbar_track = "#0f0f0f"
-    scrollbar_thumb = "#333333"
-else:
-    bg          = "#f5f5f0"
-    topbar_bg   = "#ffffff"
-    card_bg     = "#ffffff"
-    card_border = "#e0e0e0"
-    text_main   = "#1a1a1a"
-    text_body   = "#2a2a2a"
-    text_muted  = "#666666"
-    text_dim    = "#999999"
-    input_bg    = "#ffffff"
-    input_bdr   = "#d0d0d0"
-    hr_color    = "#e8e8e8"
-    hover_bg    = "#f0f0f0"
-    tab_bg      = "#ececec"
-    tab_border  = "#d8d8d8"
-    expander_bg = "#f9f9f9"
-    tag_bg      = "#eeeeee"
-    tag_color   = "#555555"
-    tag_border  = "#d0d0d0"
-    blog_bg     = "#ffffff"
-    blog_bdr    = "#e0e0e0"
-    project_bg  = "#ffffff"
-    toggle_icon = "🌙"
-    toggle_lbl  = "Dark"
-    scrollbar_track = "#f5f5f0"
-    scrollbar_thumb = "#cccccc"
+bg          = "#f5f5f0"
+topbar_bg   = "#ffffff"
+card_bg     = "#ffffff"
+card_border = "#e0e0e0"
+text_main   = "#1a1a1a"
+text_body   = "#2a2a2a"
+text_muted  = "#666666"
+text_dim    = "#999999"
+input_bg    = "#ffffff"
+input_bdr   = "#d0d0d0"
+hr_color    = "#e8e8e8"
+hover_bg    = "#f0f0f0"
+tab_bg      = "#ececec"
+tab_border  = "#d8d8d8"
+expander_bg = "#f9f9f9"
+tag_bg      = "#eeeeee"
+tag_color   = "#555555"
+tag_border  = "#d0d0d0"
+blog_bg     = "#ffffff"
+blog_bdr    = "#e0e0e0"
+project_bg  = "#ffffff"
+scrollbar_track = "#f5f5f0"
+scrollbar_thumb = "#cccccc"
 
 accent = "#ff5733"
 
@@ -238,7 +203,7 @@ button[kind="header"] {{ display: none !important; }}
     gap: 7px;
     padding: 8px 16px;
     border-radius: 10px;
-    background: {"#1a1a1a" if not dark else "#333"};
+    background: #1a1a1a;
     color: #fff !important;
     font-size: 14px;
     font-weight: 700;
@@ -267,33 +232,7 @@ button[kind="header"] {{ display: none !important; }}
     box-shadow: 0 2px 8px rgba(255,87,51,0.3);
 }}
 .tb-link-em:hover {{ background: #e04a20; box-shadow: 0 4px 14px rgba(255,87,51,0.45); transform: translateY(-1px); }}
-/* Theme toggle — native button styled to match topbar pills */
-.tb-toggle {{
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 18px;
-    border-radius: 10px;
-    background: {tag_bg};
-    color: {text_body};
-    border: 1.5px solid {card_border};
-    font-size: 14px;
-    font-weight: 700;
-    font-family: Comic Sans MS, cursive;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    flex-shrink: 0;
-    outline: none;
-}}
-.tb-toggle:hover {{
-    border-color: {accent};
-    color: {accent};
-    background: {hover_bg};
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    transform: translateY(-1px);
-}}
+
 .skills-label {{
     font-size: 10px;
     color: {text_dim};
@@ -466,8 +405,6 @@ div[data-testid="stHorizontalBlock"] .stButton > button:hover {{
     background: rgba(224,90,74,0.05) !important;
 }}
 
-/* toggle-pill removed — now using .tb-toggle HTML link */
-
 [data-testid="stExpander"] {{
     background-color: {expander_bg} !important;
     border: 1px solid {card_border} !important;
@@ -517,7 +454,7 @@ hr {{ border-color: {hr_color} !important; margin: 16px 0; }}
 
 
 # ── HORIZONTAL TOPBAR ─────────────────────────────────────────────────────────
-skills = ["LangChain", "RAG", "LLMs", "Python", "AWS Bedrock", "FastAPI", "FAISS", "MLOps", "XGBoost", "CrewAI"]
+skills = ["Statistics", "Classical ML", "RAG", "Model Evaluations", "Guardrails", "AWS Bedrock", "FastAPI", "Observability", "MLOps", "CI/CD", "CrewAI", "Langchain"]
 chips_html = "".join(
     f'<span class="skill-tag">{s}</span>' for s in skills
 )
@@ -558,9 +495,6 @@ st.markdown(f"""
         Email
       </a>
     </div>
-    <div class="tb-vdiv"></div>
-    <!-- Theme toggle: JS clicks a hidden Streamlit button — no page navigation -->
-    
   </div>
   <!-- Row 2: skills -->
   <div class="topbar-row2">
@@ -569,14 +503,6 @@ st.markdown(f"""
   </div>
 </div>
 """, unsafe_allow_html=True)
-
-# ── Clean Theme Toggle Button (No JS) ─────────────────────────────
-toggle_col1, toggle_col2 = st.columns([9, 1])
-
-with toggle_col2:
-    if st.button(f"{toggle_icon}  {toggle_lbl}", key="theme_toggle_top"):
-        st.session_state.dark_mode = not st.session_state.dark_mode
-        st.rerun()
 
 # ── PAGE HEADER ────────────────────────────────────────────────────────────────
 st.markdown(f"""
@@ -620,7 +546,7 @@ with chat_tab:
     # ── LEFT PANEL: Mini profile card ───────────────────────────────────────────
     with profile_col:
 
-        # ── About card with Clear button ──
+        # ── About card ──
         st.markdown(f"""
         <div style="background:{card_bg};border:1px solid {card_border};border-radius:18px;padding:28px 26px;margin-bottom:18px;">
         <div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;font-family:Comic Sans MS,cursive;margin-bottom:18px;">
@@ -853,7 +779,7 @@ with experience_tab:
 
     for i, job in enumerate(EXPERIENCE):
         is_current = job["type"] == "current"
-        border_color = accent if is_current else (tag_border if not dark else "#333")
+        border_color = accent if is_current else tag_border
         dot_bg = accent if is_current else text_muted
 
         job_chips = "".join(
@@ -887,7 +813,7 @@ with experience_tab:
             unsafe_allow_html=True
         )
 
-    st.markdown(f'<div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin:16px 0 20px 0;font-family:Comic Sans MS,cursive;">🎓 Education</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-16px 0 20px 0;font-family:Comic Sans MS,cursive;">🎓 Education</div>', unsafe_allow_html=True)
 
     for edu in EDUCATION:
         note_html = f'<div style="font-size:13px;color:{text_muted};font-family:Comic Sans MS,cursive;">{edu["note"]}</div>' if edu["note"] else ""
