@@ -521,8 +521,7 @@ chat_tab, experience_tab, resume_tab, blogs_tab, projects_tab = st.tabs(
     ["💬  Chat", "🧭  Experience", "📄  Resume", "✍️  Blogs", "🚀  Projects"]
 )
 
-
-# ── TAB 1: CHAT ────────────────────────────────────────────────────────────────
+# ── Left PANEL: Chat ───────────────────────────────────────────────────────
 with chat_tab:
 
     if "messages" not in st.session_state:
@@ -531,6 +530,8 @@ with chat_tab:
         st.session_state.sources = {}
     if "preset_question" not in st.session_state:
         st.session_state.preset_question = None
+    if "awaiting_response" not in st.session_state:
+        st.session_state.awaiting_response = False
 
     def build_chat_history():
         history = []
@@ -543,10 +544,8 @@ with chat_tab:
     # ── Two-column layout: chat left, profile right ──
     profile_col, chat_col = st.columns([2, 3], gap="large")
 
-    # ── LEFT PANEL: Mini profile card ───────────────────────────────────────────
     with profile_col:
-
-        # ── About card ──
+        # ... (keep your existing profile panel code here - it looks fine)
         st.markdown(f"""
         <div style="background:{card_bg};border:1px solid {card_border};border-radius:18px;padding:28px 26px;margin-bottom:18px;">
         <div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;font-family:Comic Sans MS,cursive;margin-bottom:18px;">
@@ -591,118 +590,176 @@ with chat_tab:
         </div>
         """, unsafe_allow_html=True)
 
+# ── RIGHT PANEL: Chat ───────────────────────────────────────────────────────
+with chat_col:
+    # Display chat messages
+    chat_container = st.container(height=450)
+    with chat_container:
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
 
-    with chat_col:
-        chat_container = st.container(height=520)
-        with chat_container:
-            if not st.session_state.messages:
-                st.markdown(f"""
-                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:130px;gap:8px;">
-                    <div style="font-size:32px;">⚡</div>
-                    <div style="font-family:Comic Sans MS,cursive;font-size:20px;color:{text_muted};font-weight:700;">
-                        Start a conversation
-                    </div>
-                    <div style="font-size:14px;color:{text_dim};text-align:center;max-width:300px;line-height:1.6;font-family:Comic Sans MS,cursive;">
-                        Click a suggestion below or type your own question
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-            for i, msg in enumerate(st.session_state.messages):
-                with st.chat_message(msg["role"]):
-                    st.markdown(msg["content"])
-
-        # Suggestion buttons
-        SUGGESTIONS = [
-            "What's his GenAI experience?",
-            "What cloud platforms has he used?",
-            "What's his most recent role?",
-        ]
-        sug_cols = st.columns(len(SUGGESTIONS))
-        for col, suggestion in zip(sug_cols, SUGGESTIONS):
-            with col:
-                if st.button(suggestion, use_container_width=True, key=f"sug_{suggestion}"):
-                    st.session_state.preset_question = suggestion
-                    st.rerun()
-
-        # Clear button — compact, sits between suggestions and chat input
-        _clr_col, _clr_spacer = st.columns([1, 4])
-        with _clr_col:
-            if st.button("🗑️ Clear chat", key="clear_chat", use_container_width=True):
-                st.session_state.messages = []
-                st.session_state.sources = {}
+    # Suggestion buttons
+    SUGGESTIONS = [
+        "What's his GenAI experience?",
+        "What cloud platforms has he used?",
+        "What's his most recent role?",
+    ]
+    
+    sug_cols = st.columns(len(SUGGESTIONS))
+    for col, suggestion in zip(sug_cols, SUGGESTIONS):
+        with col:
+            if st.button(suggestion, use_container_width=True, key=f"sug_{suggestion}"):
+                st.session_state.preset_question = suggestion
                 st.rerun()
 
-        preset = st.session_state.get("preset_question", None)
-        user_input = st.chat_input("Ask anything about Hargurjeet...", key="chat_input")
+    # Clear button
+    _clr_col, _clr_spacer = st.columns([1, 4])
+    with _clr_col:
+        if st.button("🗑️ Clear chat", key="clear_chat", use_container_width=True):
+            st.session_state.messages = []
+            st.session_state.sources = {}
+            st.rerun()
 
-        question = user_input
-        if not question and preset:
-            question = preset
-            st.session_state.preset_question = None
+    # Chat input
+    preset = st.session_state.get("preset_question", None)
+    user_input = st.chat_input("Ask anything about Hargurjeet...", key="chat_input")
 
-        if question:
-            st.session_state.preset_question = None
-            chat_history = build_chat_history()
-            st.session_state.messages.append({"role": "user", "content": question})
+    question = user_input
+    if not question and preset:
+        question = preset
+        st.session_state.preset_question = None
 
-            try:
+    # Process question
+    if question and not st.session_state.awaiting_response:
+        st.session_state.awaiting_response = True
+        
+        # Add user message to chat
+        st.session_state.messages.append({"role": "user", "content": question})
+        
+        # Prepare chat history
+        chat_history = build_chat_history()
+        
+        # Add temporary assistant message with thinking indicator
+        st.session_state.messages.append({"role": "assistant", "content": "⏳ Thinking..."})
+        st.rerun()
+
+    # Handle the API call in a separate block to avoid rerun loops
+    # Handle the API call in a separate block to avoid rerun loops
+    if st.session_state.awaiting_response:
+        # Get the last assistant message index
+        last_assistant_idx = len(st.session_state.messages) - 1
+        
+        try:
+            # Get the question from the last user message
+            last_user_msg = next((msg for msg in reversed(st.session_state.messages) if msg["role"] == "user"), None)
+            
+            if last_user_msg:
+                question = last_user_msg["content"]
+                chat_history = build_chat_history()
+                
+                print(f"🔵 Making request to: {API_URL}")
+                print(f"🔵 Question: {question}")
+                print(f"🔵 Chat history length: {len(chat_history)}")
+                
+                # Make streaming request
+                full_answer = ""
+                sources = []
+                line_count = 0
+                
                 with requests.post(
                     API_URL,
                     json={"question": question, "chat_history": chat_history},
-                    stream=True
+                    stream=True,
+                    timeout=30
                 ) as response:
-                    response.raise_for_status()
-                    full_answer = ""
-                    sources = []
-                    got_first_token = False
-
-                    with chat_container:
-                        with st.chat_message("assistant"):
-                            token_placeholder = st.empty()
-                            token_placeholder.markdown(
-                                f'<div style="display:inline-flex;align-items:center;gap:8px;font-family:Comic Sans MS,cursive;font-size:15px;color:{text_muted};">'
-                                f'<span>Thinking</span>'
-                                f'<div class="thinking-dots"><span></span><span></span><span></span></div>'
-                                f'</div>',
-                                unsafe_allow_html=True
-                            )
-                            for line in response.iter_lines():
-                                if not line:
-                                    continue
-                                line = line.decode("utf-8")
-                                if not line.startswith("data: "):
-                                    continue
-                                payload = line[len("data: "):]
-                                if payload == "[DONE]":
+                    
+                    print(f"🔵 Response status: {response.status_code}")
+                    print(f"🔵 Response headers: {dict(response.headers)}")
+                    
+                    if response.status_code == 200:
+                        # Collect all SSE events
+                        for line in response.iter_lines():
+                            if not line:
+                                continue
+                            
+                            line = line.decode('utf-8')
+                            line_count += 1
+                            print(f"🔵 Line {line_count}: {line}")
+                            
+                            if line.startswith('data: '):
+                                data_str = line[6:]  # Remove 'data: ' prefix
+                                
+                                if data_str == '[DONE]':
+                                    print("🔵 Received [DONE]")
                                     break
-                                data = json.loads(payload)
-                                if "token" in data:
-                                    if not got_first_token:
-                                        got_first_token = True
-                                    full_answer += data["token"]
-                                    token_placeholder.markdown(full_answer + "▌")
-                                if "sources" in data:
-                                    sources = data["sources"]
-                            token_placeholder.markdown(full_answer)
+                                
+                                try:
+                                    data = json.loads(data_str)
 
-                    assistant_idx = len(st.session_state.messages)
-                    st.session_state.messages.append({"role": "assistant", "content": full_answer})
-                    st.session_state.sources[assistant_idx] = sources
-
-            except requests.exceptions.ConnectionError:
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": "⚠️ Could not connect to the API. Make sure FastAPI is running on port 8000."
-                })
-            except Exception as e:
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": f"⚠️ Something went wrong: {str(e)}"
-                })
-
-            st.rerun()
-
+                                    
+                                    # Check for different response formats
+                                    if "answer" in data:
+                                        print(f"🔵 Found answer: {data['answer'][:50]}...")
+                                        full_answer += data["answer"]
+                                    elif "token" in data:
+                                        full_answer += data["token"]
+                                    elif "content" in data:
+                                        print(f"🔵 Found content: {data['content'][:50]}...")
+                                        full_answer += data["content"]
+                                    elif "sources" in data:
+                                        print(f"🔵 Found sources: {data['sources']}")
+                                        sources = data["sources"]
+                                    elif "text" in data:
+                                        print(f"🔵 Found text: {data['text'][:50]}...")
+                                        full_answer += data["text"]
+                                    elif "message" in data:
+                                        print(f"🔵 Found message: {data['message'][:50]}...")
+                                        full_answer = data["message"]
+                                        break
+                                    else:
+                                        print(f"🔵 Unknown data format: {list(data.keys())}")
+                                        
+                                except json.JSONDecodeError as e:
+                                    print(f"🔴 JSON decode error: {e}")
+                                    # If it's not JSON, treat as plain text
+                                    if data_str and data_str != '[DONE]':
+                                        print(f"🔵 Adding raw text: {data_str[:50]}...")
+                                        full_answer += data_str
+                        
+                        print(f"🔵 Total lines processed: {line_count}")
+                        print(f"🔵 Final full_answer length: {len(full_answer)}")
+                        print(f"🔵 Final full_answer preview: {full_answer[:200]}")
+                        
+                        # Clean the final answer
+                        import re
+                        clean_answer = re.sub(r'<think>.*?</think>', '', full_answer, flags=re.DOTALL)
+                        clean_answer = re.sub(r'\n\s*\n', '\n\n', clean_answer).strip()
+                        
+                        if clean_answer:
+                            print(f"🔵 Setting answer: {clean_answer[:100]}...")
+                            st.session_state.messages[last_assistant_idx]["content"] = clean_answer
+                        else:
+                            print("🔴 No answer content received!")
+                            st.session_state.messages[last_assistant_idx]["content"] = "⚠️ Received empty response from API"
+                        
+                        if sources:
+                            print(f"🔵 Storing sources: {sources}")
+                            st.session_state.sources[last_assistant_idx] = sources
+                        
+                    else:
+                        error_text = response.text
+                        print(f"🔴 API Error: {response.status_code} - {error_text}")
+                        st.session_state.messages[last_assistant_idx]["content"] = f"⚠️ API Error ({response.status_code})"
+                    
+        except Exception as e:
+            print(f"🔴 Exception: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            st.session_state.messages[last_assistant_idx]["content"] = f"⚠️ Error: {str(e)}"
+        
+        st.session_state.awaiting_response = False
+        st.rerun()
 
 
 # ── TAB 2: EXPERIENCE ─────────────────────────────────────────────────────────

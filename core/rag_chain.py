@@ -1,16 +1,19 @@
-from langchain_openai import ChatOpenAI
+from core.fireworks_llm import FireworksLLM
 from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from langchain_community.vectorstores import FAISS
-from config import OPENAI_API_KEY, LLM_MODEL, LLM_TEMPERATURE, TOP_K
+from config import FIREWORKS_API_KEY, FIREWORKS_MODEL, FIREWORKS_TEMPERATURE, FIREWORKS_MAX_TOKENS, TOP_K
 
 
-def build_llm(streaming: bool = False, callbacks: list = []):
-    return ChatOpenAI(
-        model=LLM_MODEL,
-        temperature=LLM_TEMPERATURE,
-        openai_api_key=OPENAI_API_KEY,
+def build_llm(streaming: bool = False, callbacks: list = [], hide_think_blocks: bool = True):
+    """Build Fireworks LLM instance"""
+    return FireworksLLM(
+        model=FIREWORKS_MODEL,
+        temperature=FIREWORKS_TEMPERATURE,
+        max_tokens=FIREWORKS_MAX_TOKENS,
+        api_key=FIREWORKS_API_KEY,
         streaming=streaming,
-        callbacks=callbacks
+        callbacks=callbacks,
+        hide_think_blocks=hide_think_blocks
     )
 
 
@@ -51,18 +54,50 @@ Context from documents:
 
 def ask(vector_store, question: str, chat_history: list = []):
     """For terminal use via main.py"""
+    print(f"\n🔵 [RAG] ask() called with question: {question}")
+    print(f"🔵 [RAG] Chat history length: {len(chat_history)}")
+    
+    # Check if vector_store is valid
+    print(f"🔵 [RAG] Vector store type: {type(vector_store)}")
+    
     docs = retrieve_docs(vector_store, question)
+    print(f"🔵 [RAG] Retrieved {len(docs)} documents")
+    
+    if len(docs) == 0:
+        print("🔴 [RAG] No documents retrieved!")
+    
     context = "\n\n".join(doc.page_content for doc in docs)
+    print(f"🔵 [RAG] Context length: {len(context)} characters")
+    print(f"🔵 [RAG] Context preview: {context[:200]}...")
+    
     messages = build_prompt(question, context, chat_history)
+    print(f"🔵 [RAG] Built prompt with {len(messages)} messages")
+    print(f"🔵 [RAG] Last message: {messages[-1]}")
 
     llm = build_llm()
-    response = llm.invoke(messages)
+    print(f"🔵 [RAG] LLM created: {type(llm)}")
+    
+    try:
+        response = llm.invoke(messages)
+        print(f"🔵 [RAG] LLM response type: {type(response)}")
+        print(f"🔵 [RAG] LLM response preview: {str(response)[:200]}")
+        print(f"🔵 [RAG] LLM response length: {len(str(response))}")
+        
+        if not response:
+            print("🔴 [RAG] Empty response from LLM!")
+            response = "I couldn't generate a response at this time."
+            
+    except Exception as e:
+        print(f"🔴 [RAG] Error in LLM invoke: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        response = f"Error generating response: {str(e)}"
 
-    print(f"\n💬 Answer:\n{response.content}")
+    print(f"\n💬 Answer:\n{response}")
     print("\n📄 Sources:")
     for i, doc in enumerate(docs):
         source = doc.metadata.get("source", "Unknown")
         page = doc.metadata.get("page", "?")
         print(f"  [{i+1}] {source} — page {page}")
 
-    return {"answer": response.content, "source_documents": docs}
+    return {"answer": response, "source_documents": docs}
