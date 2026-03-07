@@ -593,8 +593,20 @@ with chat_tab:
 # ── RIGHT PANEL: Chat ───────────────────────────────────────────────────────
 with chat_col:
     # Display chat messages
-    chat_container = st.container(height=450)
+    chat_container = st.container(height=300)
     with chat_container:
+        if not st.session_state.messages:
+                st.markdown(f"""
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:130px;gap:8px;">
+                    <div style="font-size:32px;">⚡</div>
+                    <div style="font-family:Comic Sans MS,cursive;font-size:20px;color:{text_muted};font-weight:700;">
+                        Start a conversation
+                    </div>
+                    <div style="font-size:14px;color:{text_dim};text-align:center;max-width:300px;line-height:1.6;font-family:Comic Sans MS,cursive;">
+                        Click a suggestion below or type your own question
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
