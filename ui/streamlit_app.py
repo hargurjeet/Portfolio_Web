@@ -1015,15 +1015,6 @@ with projects_tab:
 
     PROJECTS = [
         {
-            "title": "Finance Planner",
-            "description": "An AI-powered retirement planning tool built with CrewAI and AWS Bedrock.",
-            "banner": "https://plus.unsplash.com/premium_photo-1723802573606-f3828a8975c8?w=1200&q=80",
-            "tags": ["Crewai", "FastAPI", "Streamlit", "Multi Agent Orchestration", "GPT-4o-mini", "Tool Calling"],
-            "github_url": "https://github.com/hargurjeet/Finance_Planner",
-            "live_url": "https://yourapp.streamlit.app",
-            "status": "Live",
-        },
-        {
             "title": "Resume Parser",
             "description": "An intelligent resume parsing system powered by AWS Bedrock Claude and structured output validation. Extract structured candidate information from PDF resumes with high accuracy using AI.",
             "banner": "https://images.unsplash.com/photo-1698047681432-006d2449c631?w=1200&q=80",
@@ -1032,6 +1023,24 @@ with projects_tab:
             "live_url": "https://huggingface.co/spaces/Hargurjeet/Resume_parser",
             "status": "Live",
         },
+        {
+            "title": "Local Small Language Model(SLM) Benchmarking Study",
+            "description": "A comprehensive benchmark of Llama 3.2, Phi-3 mini, and Mistral 7B on local hardware. Features include JSON output enforcement, Pydantic validation, retry mechanisms, and detailed performance metrics across 30 test prompts.",
+            "banner": "https://images.unsplash.com/photo-1683515424285-f52d31451b73?w=2400&h=900&fit=crop&auto=format&q=80",  # You'll need to host this
+            "tags": ["LLM", "Ollama", "FastAPI", "Pydantic", "Benchmarking", "Python"],
+            "github_url": "https://github.com/hargurjeet/local_slm_experiments/tree/main",
+            "live_url": "https://dev.to/gurjeet333/running-llms-locally-a-rigorous-benchmark-of-phi-3-mistral-and-llama-32-on-ollama-2289",  # Your Dev.to post
+            "status": "Research",
+        },
+        {
+            "title": "Finance Planner (In Progress)",
+            "description": "An AI-powered retirement planning tool built with CrewAI and AWS Bedrock.",
+            "banner": "https://plus.unsplash.com/premium_photo-1723802573606-f3828a8975c8?w=1200&q=80",
+            "tags": ["Crewai", "FastAPI", "Streamlit", "Multi Agent Orchestration", "GPT-4o-mini", "Tool Calling"],
+            "github_url": "https://github.com/hargurjeet/Finance_Planner",
+            "live_url": "https://yourapp.streamlit.app",
+            "status": "Live",
+        }
     ]
 
     st.markdown(f'<div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:24px;margin-top:8px;font-family:Comic Sans MS,cursive;">🚀 Deployed Projects</div>', unsafe_allow_html=True)
