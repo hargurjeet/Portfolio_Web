@@ -1015,6 +1015,26 @@ with projects_tab:
 
     PROJECTS = [
         {
+            "title": "Production-Grade Hybrid RAG System with Evaluation & CI Gating",
+            "description": "A production-ready Retrieval-Augmented Generation (RAG) system built with hybrid search (BM25 + vector), reranking, and automated evaluation. Features real-time observability via Streamlit UI, live evaluation tracing, and CI/CD quality gating using RAGAS to prevent deployment of low-quality models.",
+            "banner": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=2400&h=900&fit=crop&auto=format&q=80",
+            "tags": [
+                "RAG",
+                "Weaviate",
+                "Cohere",
+                "Groq",
+                "Streamlit",
+                "RAGAS",
+                "Vector DB",
+                "Hybrid Search",
+                "CI/CD",
+                "Python"
+            ],
+            "github_url": "https://github.com/hargurjeet/hybrid-rag",  # update if needed
+            "live_url": "https://huggingface.co/spaces/Hargurjeet/hybrid_rag_hf",  # update this
+            "status": "Live",
+        },
+        {
             "title": "Resume Parser",
             "description": "An intelligent resume parsing system powered by AWS Bedrock Claude and structured output validation. Extract structured candidate information from PDF resumes with high accuracy using AI.",
             "banner": "https://images.unsplash.com/photo-1698047681432-006d2449c631?w=1200&q=80",
