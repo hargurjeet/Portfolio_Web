@@ -3,6 +3,7 @@ import requests
 import base64
 import json
 import os
+import time
 
 API_URL = os.getenv("API_URL", "http://localhost:8000/api/v1/chat")
 RESUME_PATH = "data/Hargurjeet_Singh_Ganger_KnowledgeBase.pdf"
@@ -533,6 +534,19 @@ with chat_tab:
     if "awaiting_response" not in st.session_state:
         st.session_state.awaiting_response = False
 
+    # ── Backend health check — show warming-up state on cold start ──
+    def _backend_ready():
+        try:
+            r = requests.get("http://localhost:8000/health", timeout=2)
+            return r.status_code == 200
+        except Exception:
+            return False
+
+    if not _backend_ready():
+        st.info("⏳ The AI backend is warming up — this takes about 30 seconds on a cold start. Checking again shortly...")
+        time.sleep(3)
+        st.rerun()
+
     def build_chat_history():
         history = []
         msgs = st.session_state.messages
@@ -683,7 +697,7 @@ with chat_col:
                     API_URL,
                     json={"question": question, "chat_history": chat_history},
                     stream=True,
-                    timeout=30
+                    timeout=(5, 90)
                 ) as response:
                     
                     print(f"🔵 Response status: {response.status_code}")
@@ -764,6 +778,10 @@ with chat_col:
                         print(f"🔴 API Error: {response.status_code} - {error_text}")
                         st.session_state.messages[last_assistant_idx]["content"] = f"⚠️ API Error ({response.status_code})"
                     
+        except requests.exceptions.ConnectionError:
+            st.session_state.messages[last_assistant_idx]["content"] = "⏳ The AI backend is still warming up. Please wait a few seconds and try again."
+        except requests.exceptions.ReadTimeout:
+            st.session_state.messages[last_assistant_idx]["content"] = "⏳ The AI took too long to respond. Please try again."
         except Exception as e:
             print(f"🔴 Exception: {str(e)}")
             import traceback
