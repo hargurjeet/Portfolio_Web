@@ -15,6 +15,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Pre-download the embedding model so cold starts don't need to fetch it
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-mpnet-base-v2')"
+
 RUN sed -i 's/\r$//' start.sh && chmod +x start.sh
 
 EXPOSE 8000
