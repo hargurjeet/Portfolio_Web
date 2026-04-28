@@ -16,6 +16,8 @@ primary_region = "sin"
     type = "connections"
     hard_limit = 25
     soft_limit = 20
+  [http_service.http_options]
+    idle_timeout = 120
 
 [[vm]]
   memory = "1gb"

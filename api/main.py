@@ -77,10 +77,21 @@ async def chat(request: ChatRequest):
     
     async def generate():
         try:
-            # Call the RAG chain
+            # Run blocking LLM call in a thread so the event loop stays free
+            # and we can send keepalive pings while waiting
             logger.info("🔵 Calling ask() function...")
-            result = ask(vector_store, request.question, request.chat_history)
-            
+            loop = asyncio.get_event_loop()
+            result_future = loop.run_in_executor(
+                None, lambda: ask(vector_store, request.question, request.chat_history)
+            )
+
+            # Send SSE keepalive comments every 5s while LLM is thinking
+            while not result_future.done():
+                yield ": keepalive\n\n"
+                await asyncio.sleep(5)
+
+            result = await result_future
+
             # Extract answer and sources
             answer = result.get("answer", "")
             sources = result.get("source_documents", [])
