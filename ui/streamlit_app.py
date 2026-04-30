@@ -622,10 +622,10 @@ with chat_col:
                     st.markdown(msg["content"])
 
             with st.chat_message("assistant"):
+                # Use a mutable list so the generator can populate it without nonlocal
                 pending_sources = []
 
                 def _sse_token_generator():
-                    nonlocal pending_sources
                     try:
                         with requests.post(
                             API_URL,
@@ -655,7 +655,8 @@ with chat_col:
                                 if "token" in data:
                                     yield data["token"]
                                 elif "sources" in data:
-                                    pending_sources = data["sources"]
+                                    pending_sources.clear()
+                                    pending_sources.extend(data["sources"])
                                 elif "error" in data:
                                     yield f"\n\n⚠️ {data['error']}"
                                     return
