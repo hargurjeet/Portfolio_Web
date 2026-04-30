@@ -31,7 +31,8 @@ def build_prompt(question: str, context: str, chat_history: list) -> list:
     Build messages list with system prompt, history, and current question.
     chat_history: list of [human, ai] pairs
     """
-    system = """You are a helpful assistant for Hargurjeet Singh Ganger's portfolio chatbot.
+    system = """/no_think
+You are a helpful assistant for Hargurjeet Singh Ganger's portfolio chatbot.
 Use the context below to answer questions about his experience, skills, and background.
 For conversational questions (like "what did I just ask?" or "can you elaborate?"),
 use the chat history to respond naturally.

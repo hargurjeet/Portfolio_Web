@@ -547,9 +547,10 @@ with chat_tab:
         time.sleep(3)
         st.rerun()
 
-    def build_chat_history():
+    def build_chat_history(msgs=None):
+        if msgs is None:
+            msgs = st.session_state.messages
         history = []
-        msgs = st.session_state.messages
         for i in range(0, len(msgs) - 1, 2):
             if msgs[i]["role"] == "user" and msgs[i + 1]["role"] == "assistant":
                 history.append([msgs[i]["content"], msgs[i + 1]["content"]])
@@ -614,6 +615,9 @@ with chat_col:
         last_user_msg = next(
             (m for m in reversed(st.session_state.messages) if m["role"] == "user"), None
         )
+        # Fix: exclude the current user message + "⏳ Thinking..." from history
+        # so the API only sees fully completed prior exchanges.
+        clean_history = build_chat_history(st.session_state.messages[:-2])
 
         with chat_container:
             # Show all messages except the last "⏳ Thinking..." placeholder
@@ -631,7 +635,7 @@ with chat_col:
                             API_URL,
                             json={
                                 "question": last_user_msg["content"],
-                                "chat_history": build_chat_history(),
+                                "chat_history": clean_history,
                             },
                             stream=True,
                             timeout=(5, 90),
@@ -705,8 +709,11 @@ with chat_col:
     for col, suggestion in zip(sug_cols, SUGGESTIONS):
         with col:
             if st.button(suggestion, use_container_width=True, key=f"sug_{suggestion}"):
-                st.session_state.preset_question = suggestion
-                st.rerun()
+                if not st.session_state.awaiting_response:
+                    st.session_state.awaiting_response = True
+                    st.session_state.messages.append({"role": "user", "content": suggestion})
+                    st.session_state.messages.append({"role": "assistant", "content": "⏳ Thinking..."})
+                    st.rerun()
 
     # Clear button
     _clr_col, _clr_spacer = st.columns([1, 4])
@@ -717,18 +724,11 @@ with chat_col:
             st.rerun()
 
     # Chat input
-    preset = st.session_state.get("preset_question", None)
     user_input = st.chat_input("Ask anything about Hargurjeet...", key="chat_input")
 
-    question = user_input
-    if not question and preset:
-        question = preset
-        st.session_state.preset_question = None
-
-    # Process question: add to session state and rerun to trigger streaming path
-    if question and not st.session_state.awaiting_response:
+    if user_input and not st.session_state.awaiting_response:
         st.session_state.awaiting_response = True
-        st.session_state.messages.append({"role": "user", "content": question})
+        st.session_state.messages.append({"role": "user", "content": user_input})
         st.session_state.messages.append({"role": "assistant", "content": "⏳ Thinking..."})
         st.rerun()
 
