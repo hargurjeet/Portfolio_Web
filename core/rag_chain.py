@@ -1,6 +1,7 @@
 from core.fireworks_llm import FireworksLLM
 from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from langchain_community.vectorstores import FAISS
+from typing import Generator, Tuple
 from config import FIREWORKS_API_KEY, FIREWORKS_MODEL, FIREWORKS_TEMPERATURE, FIREWORKS_MAX_TOKENS, TOP_K
 
 
@@ -101,3 +102,16 @@ def ask(vector_store, question: str, chat_history: list = []):
         print(f"  [{i+1}] {source} — page {page}")
 
     return {"answer": response, "source_documents": docs}
+
+
+def ask_stream(
+    vector_store,
+    question: str,
+    chat_history: list = [],
+) -> Tuple[Generator[str, None, None], list]:
+    """Streaming version of ask(). Returns (token_generator, source_documents)."""
+    docs = retrieve_docs(vector_store, question)
+    context = "\n\n".join(doc.page_content for doc in docs)
+    messages = build_prompt(question, context, chat_history)
+    llm = build_llm()
+    return llm.stream_tokens(messages), docs

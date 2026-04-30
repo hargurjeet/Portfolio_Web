@@ -1,5 +1,5 @@
 from langchain.llms.base import LLM
-from typing import Optional, List, Mapping, Any
+from typing import Optional, List, Mapping, Any, Generator
 import requests
 import json
 import os
@@ -33,13 +33,88 @@ class FireworksLLM(LLM):
     def _clean_response(self, text: str) -> str:
         """Remove think blocks from the response"""
         if self.hide_think_blocks:
-            # Remove everything between <think> and </think> tags including the tags themselves
             cleaned = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
-            # Also remove any leftover whitespace from the removal
             cleaned = re.sub(r'\n\s*\n', '\n\n', cleaned)
             return cleaned.strip()
         return text
-    
+
+    def stream_tokens(self, messages: list) -> Generator[str, None, None]:
+        """Stream tokens from Fireworks API via SSE with stateful think-block stripping."""
+        url = "https://api.fireworks.ai/inference/v1/chat/completions"
+        payload = {
+            "model": self.model,
+            "messages": messages,
+            "max_tokens": self.max_tokens,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "top_k": self.top_k,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+            "stream": True,
+        }
+        headers = {
+            "Accept": "text/event-stream",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        }
+
+        with requests.post(url, headers=headers, json=payload, stream=True, timeout=60) as response:
+            if response.status_code != 200:
+                raise Exception(
+                    f"Fireworks stream error {response.status_code}: {response.text[:200]}"
+                )
+
+            # States: "buffering" → accumulate to detect <think> prefix
+            #         "in_think"  → discard until </think> found in buffer
+            #         "yielding"  → pass tokens directly to caller
+            state = "buffering" if self.hide_think_blocks else "yielding"
+            buffer = ""
+            BUFFER_LIMIT = 50  # chars before assuming no think block
+
+            for raw_line in response.iter_lines():
+                if not raw_line:
+                    continue
+                line = raw_line.decode("utf-8") if isinstance(raw_line, bytes) else raw_line
+                if not line.startswith("data: "):
+                    continue
+                data_str = line[6:]
+                if data_str.strip() == "[DONE]":
+                    break
+                try:
+                    chunk = json.loads(data_str)
+                except json.JSONDecodeError:
+                    continue
+                choices = chunk.get("choices", [])
+                if not choices:
+                    continue
+                token = choices[0].get("delta", {}).get("content", "")
+                if not token:
+                    continue
+
+                if state == "yielding":
+                    yield token
+                elif state == "buffering":
+                    buffer += token
+                    if buffer.lstrip().startswith("<think>"):
+                        state = "in_think"
+                    elif len(buffer) >= BUFFER_LIMIT:
+                        state = "yielding"
+                        yield buffer
+                        buffer = ""
+                elif state == "in_think":
+                    buffer += token
+                    close_idx = buffer.find("</think>")
+                    if close_idx != -1:
+                        after = buffer[close_idx + len("</think>"):].lstrip("\n ")
+                        buffer = ""
+                        state = "yielding"
+                        if after:
+                            yield after
+
+            # Flush residual buffer if response was short and never hit BUFFER_LIMIT
+            if buffer and state == "buffering":
+                yield buffer
+
     @property
     def _llm_type(self) -> str:
         return "fireworks"
@@ -81,7 +156,7 @@ class FireworksLLM(LLM):
             }
             
             # Make the API call
-            response = requests.post(url, headers=headers, json=payload)
+            response = requests.post(url, headers=headers, json=payload, timeout=60)
             
             # Check for errors
             if response.status_code != 200:
