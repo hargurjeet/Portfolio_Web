@@ -22,8 +22,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Now import your core modules
 from core.vector_store import load_vector_store
-from core.rag_chain import retrieve_docs, build_prompt, build_llm
-from config import INDEX_PATH
+from core.rag_chain import build_prompt, build_llm
+from config import INDEX_PATH, TOP_K
 
 app = FastAPI(title="Hargurjeet's Portfolio RAG API")
 
@@ -40,15 +40,21 @@ class ChatRequest(BaseModel):
     question: str
     chat_history: list = []
 
-# Load vector store at startup
+# Load vector store, retriever and LLM once at startup
 logger.info("🔵 Loading vector store...")
 try:
     vector_store = load_vector_store(INDEX_PATH)
     logger.info(f"✅ Vector store loaded successfully from {INDEX_PATH}")
-    logger.info(f"📊 Vector store type: {type(vector_store)}")
+    retriever = vector_store.as_retriever(
+        search_type="similarity", search_kwargs={"k": TOP_K}
+    )
+    llm = build_llm()
+    logger.info("✅ Retriever and LLM initialised")
 except Exception as e:
     logger.error(f"❌ Failed to load vector store: {e}")
     vector_store = None
+    retriever = None
+    llm = None
 
 @app.get("/")
 async def root():
@@ -62,15 +68,15 @@ async def root():
 async def health():
     return {
         "status": "healthy" if vector_store else "degraded",
-        "vector_store_loaded": vector_store is not None
+        "vector_store_loaded": vector_store is not None,
+        "llm_ready": llm is not None,
     }
 
 @app.post("/api/v1/chat")
 async def chat(request: ChatRequest):
-    # Check if vector store is loaded
-    if vector_store is None:
-        logger.error("❌ Vector store not loaded")
-        raise HTTPException(status_code=500, detail="Vector store not loaded")
+    if retriever is None or llm is None:
+        logger.error("❌ Retriever or LLM not ready")
+        raise HTTPException(status_code=500, detail="Backend not ready")
     
     logger.info(f"📝 Received question: {request.question}")
     logger.info(f"📝 Chat history length: {len(request.chat_history)}")
@@ -80,7 +86,7 @@ async def chat(request: ChatRequest):
             loop = asyncio.get_running_loop()
 
             # Fast sync retrieval — FAISS lookup takes milliseconds
-            docs = retrieve_docs(vector_store, request.question)
+            docs = retriever.invoke(request.question)
             context = "\n\n".join(doc.page_content for doc in docs)
             messages = build_prompt(request.question, context, request.chat_history)
             logger.info(f"📄 Retrieved {len(docs)} docs, built prompt")
@@ -101,7 +107,6 @@ async def chat(request: ChatRequest):
 
             def _run_stream():
                 try:
-                    llm = build_llm()
                     for token in llm.stream_tokens(messages):
                         loop.call_soon_threadsafe(queue.put_nowait, token)
                 except Exception as exc:

@@ -544,7 +544,7 @@ with chat_tab:
 
     if not _backend_ready():
         st.info("⏳ The AI backend is warming up — this takes about 30 seconds on a cold start. Checking again shortly...")
-        time.sleep(3)
+        time.sleep(1)
         st.rerun()
 
     def build_chat_history(msgs=None):

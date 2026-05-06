@@ -1,7 +1,4 @@
-data/Hargurjeet_Lead_GenAI_Specialist.pdf
 .DS_Store
-data/my_avatar.png
-faiss_index/
 .env
 __pycache__/
 **/__pycache__/
