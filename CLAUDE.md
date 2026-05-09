@@ -1,6 +1,65 @@
-# CLAUDE.md
+# Portfolio Web — Claude Context
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## What This Project Does
+
+A RAG-powered portfolio chatbot. Users visit the Streamlit UI, ask questions about Hargurjeet, and receive streamed answers drawn from a FAISS vector index built from a PDF knowledge base. The UI also has tabs for Experience, Resume download, Blogs, and Projects.
+
+**Live at**: https://huggingface.co/spaces/Hargurjeet/portfolio-chatbot (HuggingFace Spaces, Docker SDK)
+
+## Stack
+
+- **Backend**: FastAPI (port 8000, internal-only) — SSE streaming endpoint
+- **Frontend**: Streamlit (port 8501, public) — custom CSS, Comic Sans MS, 5-tab layout
+- **LLM**: Fireworks AI — `accounts/fireworks/models/qwen3-8b` via custom `FireworksLLM` class
+- **Embeddings**: `sentence-transformers/all-mpnet-base-v2` (768-dim, CPU, normalised)
+- **Vector store**: FAISS index stored at `faiss_index/` (tracked via git LFS)
+- **Deployment**: Single Docker container on HuggingFace Spaces (Docker SDK, port 8501)
+- **Package manager**: `pip` / `requirements.txt` (also has `pyproject.toml` + `uv.lock` for uv)
+- **Remotes**: `github` → GitHub, `space` → HuggingFace Spaces (legacy, may be unused)
+
+## Key Files
+
+| File | Role |
+|------|------|
+| `api/main.py` | **Active** FastAPI entry point — `/api/v1/chat`, `/health`, `/` |
+| `core/fireworks_llm.py` | Custom LangChain LLM wrapping Fireworks REST API directly; handles think-block stripping |
+| `core/rag_chain.py` | `build_prompt()`, `build_llm()`, `ask()`, `ask_stream()` |
+| `core/vector_store.py` | FAISS load/save with HuggingFace embeddings |
+| `core/loader.py` | PDF/text loader via `PyPDFLoader` |
+| `core/splitter.py` | `RecursiveCharacterTextSplitter` (chunk=200, overlap=50) |
+| `config.py` | All tuneable constants — chunk size, TOP_K, model IDs, paths |
+| `ui/streamlit_app.py` | Full Streamlit UI — topbar, 5 tabs, SSE chat, experience/blogs/projects data |
+| `build_index.py` | One-shot script: load PDF → chunk → embed → save FAISS index |
+| `start.sh` | Launches FastAPI + Streamlit in parallel; `wait -n; wait` keeps container alive |
+| `Dockerfile` | Python 3.10-slim; pre-downloads embedding model into image layer |
+| `data/Hargurjeet_Singh_Ganger_KnowledgeBase.pdf` | Source document for FAISS index |
+| `data/Hargurjeet_Lead_GenAI_Specialist.pdf` | Resume PDF served for download in UI |
+| `data/my_avatar.png` | Avatar shown in the topbar |
+| `faiss_index/` | Pre-built FAISS index (`index.faiss` + `index.pkl`) — git LFS, included in Docker |
+
+### Dead code — do not touch or treat as active
+
+| File | Status |
+|------|--------|
+| `api/routes/chat.py` | **Not mounted** — original HF Spaces version using `AsyncIteratorCallbackHandler`. Defined as a router but never added to `api/main.py`. |
+| `main.py` (root) | **Mostly commented out** — was the original CLI chatbot. Lower half contains a duplicate FastAPI stub used for debugging. Not run in production. |
+
+## Data Flow
+
+```
+POST /api/v1/chat  { question, chat_history }
+  → FAISS similarity search (TOP_K=4 docs)
+  → build_prompt() → system + context + history + question (messages list)
+  → thread executor: FireworksLLM.stream_tokens() → sync SSE generator
+     → stateful think-block stripper (buffering → in_think → yielding)
+  → asyncio.Queue bridges sync generator → async SSE
+  → SSE frames: sources first, then tokens, then [DONE]
+
+Streamlit _sse_token_generator()
+  → consumes SSE, yields tokens to st.write_stream()
+  → pending_sources[] populated from "sources" frame
+  → on [DONE]: rerun() to finalise state
+```
 
 ## Commands
 
@@ -9,75 +68,86 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 pip install -r requirements.txt
 
 # Build/rebuild the FAISS vector index from the knowledge base PDF
-python3.10 build_index.py
+python build_index.py
 
-# Run the FastAPI backend (port 8000)
-python3.10 -m uvicorn api.main:app --reload --port 8000
+# Run FastAPI backend (port 8000)
+uvicorn api.main:app --reload --port 8000
 
-# Run the Streamlit frontend (port 8501)
-python3.10 -m streamlit run ui/streamlit_app.py --server.port 8501
+# Run Streamlit frontend (port 8501)
+streamlit run ui/streamlit_app.py --server.port 8501
 
-# Run both services together (production-style)
+# Run both together (production-style)
 bash start.sh
-
-# CLI chatbot for quick RAG testing without the UI
-python3.10 main.py
 
 # Health check
 curl http://localhost:8000/health
 
-# Test the chat endpoint
+# Test chat endpoint
 curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"question": "What is his GenAI experience?", "chat_history": []}'
 
-# Deploy to fly.io (must run from this directory)
-flyctl deploy --app hargurjeet-portfolio
+# Deploy to HuggingFace Spaces (push to the space remote)
+git push space main
 ```
 
 ## Environment Variables
 
-Copy `.env.example` or create `.env` in the project root:
+Create `.env` in the project root (git-ignored):
 ```
-FIREWORKS_API_KEY=...   # Required for LLM responses
-OPENAI_API_KEY=...      # Legacy; not used by the active LLM path
-```
-
-On fly.io, secrets are set via `flyctl secrets set FIREWORKS_API_KEY=...`.
-
-## Architecture
-
-This is a **RAG-powered portfolio chatbot** with two processes running in a single container:
-
-```
-Browser → Streamlit (port 8501) → FastAPI (port 8000) → Fireworks AI API
-                                         ↓
-                                    FAISS index (local disk)
-                                         ↓
-                              HuggingFace embedding model
-                              (all-mpnet-base-v2, 768-dim)
+FIREWORKS_API_KEY=fw_...
 ```
 
-### Key architectural facts
+On HuggingFace Spaces, set via: Settings → Variables and secrets → New secret
 
-**Two FastAPI entry points exist — only `api/main.py` is active:**
-- `api/main.py` — the real entry point used by `start.sh` and fly.io. Defines `/api/v1/chat` directly on the app (not via router), loads the vector store at module startup, simulates streaming by sending characters one-by-one with a 10ms delay.
-- `api/routes/chat.py` — a secondary router that is **not mounted** in `api/main.py`. It uses `AsyncIteratorCallbackHandler` for true token-level streaming from `FireworksLLM`. It was the original HuggingFace Spaces version.
+Stale/unused vars still in `config.py` (safe to ignore):
+- `OPENAI_API_KEY` — not used
+- `LLM_MODEL = "gpt-5-nano"` — not used
 
-**LLM**: Custom `FireworksLLM` class (`core/fireworks_llm.py`) wraps the Fireworks AI REST API directly. Model is `accounts/fireworks/models/qwen3-8b`. The class strips `<think>...</think>` blocks (chain-of-thought) from responses before returning them.
+## Configuration (config.py)
 
-**Vector store**: FAISS index stored at `faiss_index/` (excluded from git, included in Docker). The index is built from `data/Hargurjeet_Singh_Ganger_KnowledgeBase.pdf` using `build_index.py`. If `faiss_index/` is missing, run `build_index.py` before starting the API.
+| Constant | Value | Notes |
+|----------|-------|-------|
+| `DOCS_PATH` | `data/Hargurjeet_Singh_Ganger_KnowledgeBase.pdf` | Source for FAISS index |
+| `INDEX_PATH` | `faiss_index` | FAISS index directory |
+| `EMBEDDING_MODEL` | `all-mpnet-base-v2` | HuggingFace sentence-transformer |
+| `CHUNK_SIZE` | 200 | Characters per chunk |
+| `CHUNK_OVERLAP` | 50 | Overlap between chunks |
+| `TOP_K` | 4 | Documents retrieved per query |
+| `FIREWORKS_MODEL` | `accounts/fireworks/models/qwen3-8b` | Active LLM |
+| `FIREWORKS_TEMPERATURE` | 0.6 | |
+| `FIREWORKS_MAX_TOKENS` | 512 | |
 
-**Embedding model**: `sentence-transformers/all-mpnet-base-v2` loaded via `langchain-huggingface`. The Dockerfile pre-downloads this model into the image layer (`RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-mpnet-base-v2')"`) to avoid slow cold starts on fly.io.
+## Think-Block Stripping
 
-**Startup order**: `start.sh` starts FastAPI and Streamlit in parallel. FastAPI takes ~30–60s to load the FAISS index; Streamlit comes up in seconds. The Streamlit UI handles `ConnectionRefusedError` gracefully while FastAPI is still loading.
+`FireworksLLM.stream_tokens()` implements a 3-state machine to strip `<think>...</think>` blocks from Qwen3's chain-of-thought output before streaming tokens to the client:
 
-**All RAG config** (`CHUNK_SIZE`, `TOP_K`, model names, paths) is centralised in `config.py`.
+- **`buffering`**: accumulate until `<think>` prefix detected or buffer ≥ 50 chars
+- **`in_think`**: discard tokens until `</think>` found, then switch to `yielding`
+- **`yielding`**: pass tokens directly to caller
 
-## fly.io Deployment
+Controlled by `hide_think_blocks=True` on the LLM instance.
 
-- App name: `hargurjeet-portfolio`
-- Region: `sin` (Singapore)
-- Config: `fly.toml` in this directory — deploy is always run from the `Portfolio_Web/` root
-- Internal port `8501` (Streamlit) is exposed publicly; FastAPI on `8000` is internal-only
-- The `FIREWORKS_API_KEY` secret must be set on the fly.io app, not in `.env`
+## HuggingFace Spaces Deployment Details
+
+- Space: `Hargurjeet/portfolio-chatbot`
+- SDK: Docker (`sdk: docker` in README frontmatter)
+- Exposed port: `8501` (Streamlit) — only this port is accessible publicly; FastAPI on `8000` is internal-only
+- Deploy by pushing to the `space` git remote — HF Spaces rebuilds the Docker image automatically
+- `FIREWORKS_API_KEY` must be set as a Space secret (Settings → Variables and secrets)
+- HF Spaces does not guarantee always-on; Streamlit's `/health` polling loop handles cold-start gracefully
+
+## Known Issues / Security Notes
+
+- **HF token in git remote URL**: The `space` remote URL contains a plaintext HF token. Rotate it at huggingface.co/settings/tokens if still active. Fix with: `git remote set-url space https://huggingface.co/spaces/Hargurjeet/portfolio-chatbot`
+- **Wide-open CORS**: `allow_origins=["*"]` — acceptable for a public portfolio, but worth tightening if the API is ever used for anything sensitive
+- **FAISS index in git LFS**: `faiss_index/index.faiss` and `faiss_index/index.pkl` are tracked via LFS. Rebuild with `build_index.py` if the knowledge base PDF changes
+- **No tests**: `tests/` directory exists but is empty
+
+## Docs
+
+- `docs/architecture.md` — full system design and data flow
+- `docs/api.md` — API endpoint reference
+- `docs/setup.md` — local and Docker setup guide
+- `docs/deployment.md` — HuggingFace Spaces deployment details and operations
+- `docs/data-models.md` — request/response schemas and config reference

@@ -999,7 +999,7 @@ with projects_tab:
             "banner": "https://images.unsplash.com/photo-1698047681432-006d2449c631?w=1200&q=80",
             "tags": ["Python", "OpenAI", "Pandas", "AWS"],
             "github_url": "https://github.com/hargurjeet/resume-parser",
-            "live_url": "https://huggingface.co/spaces/Hargurjeet/Resume_parser",
+            "live_url": "https://hargurjeet-resume-ui.fly.dev/",
             "status": "Live",
         },
         {
@@ -1024,26 +1024,42 @@ with projects_tab:
 
     st.markdown(f'<div style="font-size:12px;color:{text_dim};letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:24px;margin-top:8px;font-family:Comic Sans MS,cursive;">🚀 Deployed Projects</div>', unsafe_allow_html=True)
 
-    for project in PROJECTS:
-        status_color = "#22c55e" if project["status"] == "Live" else "#f59e0b"
+    def render_project_card(project):
+        status_color = "#22c55e" if project["status"] == "Live" else "#f59e0b" if project["status"] == "Research" else "#aaaaaa"
+        is_placeholder = "yourapp.streamlit.app" in project.get("live_url", "")
         tags_html = "".join([
-            f'<span style="background:{tag_bg};color:{tag_color};font-size:12px;font-family:Comic Sans MS,cursive;padding:4px 12px;border-radius:4px;margin-right:6px;margin-bottom:4px;display:inline-block;">{tag}</span>'
+            f'<span style="background:{tag_bg};color:{tag_color};font-size:11px;font-family:Comic Sans MS,cursive;padding:3px 10px;border-radius:4px;margin-right:5px;margin-bottom:4px;display:inline-block;">{tag}</span>'
             for tag in project["tags"]
         ])
+        if is_placeholder:
+            launch_btn = f'<div style="background:#e0e0e0;color:#aaaaaa;font-size:13px;font-weight:700;padding:10px 18px;border-radius:9px;display:inline-flex;align-items:center;gap:7px;font-family:Comic Sans MS,cursive;cursor:default;">⏳ Coming Soon</div>'
+        else:
+            launch_btn = f'<a href="{project["live_url"]}" target="_blank" style="text-decoration:none;"><div style="background:{accent};color:#fff;font-size:13px;font-weight:700;padding:10px 18px;border-radius:9px;display:inline-flex;align-items:center;gap:7px;font-family:Comic Sans MS,cursive;" onmouseover="this.style.background=\'#e04a20\'" onmouseout="this.style.background=\'{accent}\'">🚀 Launch App</div></a>'
+        github_btn = f'<a href="{project["github_url"]}" target="_blank" style="text-decoration:none;"><div style="background:transparent;color:{text_muted};border:1px solid {card_border};font-size:13px;font-weight:600;padding:10px 18px;border-radius:9px;display:inline-flex;align-items:center;gap:7px;font-family:Comic Sans MS,cursive;" onmouseover="this.style.borderColor=\'{accent}\';this.style.color=\'{accent}\'" onmouseout="this.style.borderColor=\'{card_border}\';this.style.color=\'{text_muted}\'">🐙 GitHub</div></a>'
         card = (
-            f'<div style="background:{project_bg};border:1px solid {card_border};border-radius:18px;overflow:hidden;margin-bottom:28px;">'
-                f'<div style="width:100%;height:185px;background-image:url({project["banner"]});background-size:cover;background-position:center;position:relative;">'
-                    f'<div style="position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.8);border:1px solid {status_color};color:{status_color};font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;font-family:Comic Sans MS,cursive;">&#9679; {project["status"]}</div>'
+            f'<div style="background:{project_bg};border:1px solid {card_border};border-top:3px solid {status_color};border-radius:18px;overflow:hidden;margin-bottom:24px;transition:box-shadow 0.2s,transform 0.2s;"'
+            f' onmouseover="this.style.boxShadow=\'0 8px 32px rgba(0,0,0,0.11)\';this.style.transform=\'translateY(-2px)\'"'
+            f' onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'translateY(0)\'">'
+                f'<div style="width:100%;height:160px;background-image:url({project["banner"]});background-size:cover;background-position:center;position:relative;">'
+                    f'<div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(to bottom,transparent,{project_bg});"></div>'
+                    f'<div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.75);border:1px solid {status_color};color:{status_color};font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;font-family:Comic Sans MS,cursive;">&#9679; {project["status"]}</div>'
                 '</div>'
-                f'<div style="padding:26px 30px 24px 30px;">'
-                    f'<div style="font-family:Comic Sans MS,cursive;font-size:22px;color:{text_main};margin-bottom:12px;line-height:1.3;font-weight:700;">{project["title"]}</div>'
-                    f'<div style="font-size:15px;color:{text_muted};line-height:1.75;margin-bottom:18px;font-family:Comic Sans MS,cursive;">{project["description"]}</div>'
-                    f'<div style="margin-bottom:22px;">{tags_html}</div>'
-                    '<div style="display:flex;gap:12px;">'
-                        f'<a href="{project["live_url"]}" target="_blank" style="text-decoration:none;"><div style="background:{accent};color:#fff;font-size:14px;font-weight:700;padding:10px 22px;border-radius:9px;display:inline-flex;align-items:center;gap:8px;font-family:Comic Sans MS,cursive;">🚀 Launch App</div></a>'
-                        f'<a href="{project["github_url"]}" target="_blank" style="text-decoration:none;"><div style="background:transparent;color:{text_muted};border:1px solid {card_border};font-size:14px;font-weight:600;padding:10px 22px;border-radius:9px;display:inline-flex;align-items:center;gap:8px;font-family:Comic Sans MS,cursive;">🐙 View on GitHub</div></a>'
+                f'<div style="padding:20px 22px 20px 22px;">'
+                    f'<div style="font-family:Comic Sans MS,cursive;font-size:18px;color:{text_main};margin-bottom:10px;line-height:1.3;font-weight:700;">{project["title"]}</div>'
+                    f'<div style="font-size:13px;color:{text_muted};line-height:1.7;margin-bottom:14px;font-family:Comic Sans MS,cursive;">{project["description"]}</div>'
+                    f'<div style="margin-bottom:18px;">{tags_html}</div>'
+                    f'<div style="display:flex;gap:10px;flex-wrap:wrap;">'
+                        f'{launch_btn}'
+                        f'{github_btn}'
                     '</div>'
                 '</div>'
             '</div>'
         )
         st.markdown(card, unsafe_allow_html=True)
+
+    rows = [PROJECTS[i:i+2] for i in range(0, len(PROJECTS), 2)]
+    for row in rows:
+        cols = st.columns(2, gap="medium")
+        for col, project in zip(cols, row):
+            with col:
+                render_project_card(project)
