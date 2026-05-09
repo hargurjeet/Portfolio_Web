@@ -9,13 +9,28 @@
 
 ### How deployment works
 
-HF Spaces rebuilds the Docker image automatically whenever you push to the `space` git remote:
+Deployment is fully automated via GitHub Actions. Push to `main` on GitHub and the workflow handles the rest:
 
 ```bash
-git push space main
+git push github main
 ```
 
-The `app_port: 8501` in the README YAML frontmatter tells HF Spaces which port to route public traffic to. FastAPI on port 8000 stays internal.
+The workflow at `.github/workflows/sync-to-hf.yml` runs on every push to `main`:
+1. Checks out the repo (including git LFS files — the FAISS index)
+2. Installs `huggingface_hub`
+3. Calls `api.upload_folder()` to sync all files to `Hargurjeet/portfolio-chatbot`
+4. HF Spaces detects the change and rebuilds the Docker image automatically
+
+The `app_port: 8501` in the README YAML frontmatter tells HF Spaces which port to expose publicly. FastAPI on port 8000 stays internal.
+
+### Required secrets
+
+| Where | Name | Purpose |
+|-------|------|---------|
+| GitHub repo → Settings → Secrets → Actions | `HF_TOKEN` | Authenticates the upload to HF Spaces |
+| HF Space → Settings → Variables and secrets | `FIREWORKS_API_KEY` | LLM API key used at runtime |
+
+Both are already set and the pipeline is confirmed working.
 
 ### Setting the API key
 
@@ -43,27 +58,19 @@ The embedding model is baked into the Docker image (pre-downloaded during build)
 ## Git Remotes
 
 ```
-github  https://github.com/hargurjeet/Portfolio_Web.git
-space   https://huggingface.co/spaces/Hargurjeet/portfolio-chatbot
+github  https://github.com/hargurjeet/Portfolio_Web.git   ← primary, triggers CI/CD
+space   https://huggingface.co/spaces/Hargurjeet/portfolio-chatbot  ← legacy, no longer needed
 ```
 
-Push to both independently as needed:
-
-```bash
-git push github main   # update GitHub
-git push space main    # trigger HF Spaces rebuild
-```
+**Only push to `github main`** — the GitHub Action handles syncing to HF Spaces automatically. The `space` remote is kept for emergency manual fallback only.
 
 ### Security note — HF token in remote URL
 
 If the `space` remote URL contains an embedded HF token (visible via `git remote -v`), rotate the token and fix the remote:
 
 ```bash
-# Remove the embedded token from the remote URL
 git remote set-url space https://huggingface.co/spaces/Hargurjeet/portfolio-chatbot
 ```
-
-When pushing, Git will prompt for credentials or use your stored HF token from `huggingface-cli login`.
 
 ## FAISS Index and Git LFS
 
@@ -76,8 +83,7 @@ git lfs pull
 # After rebuilding the index locally, commit and push as usual
 git add faiss_index/
 git commit -m "Rebuild FAISS index"
-git push github main
-git push space main   # triggers a redeploy with the new index
+git push github main   # GitHub Actions syncs to HF Spaces automatically
 ```
 
 The Docker build includes the index via `COPY . .` — LFS files must be present locally before building.

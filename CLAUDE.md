@@ -15,7 +15,8 @@ A RAG-powered portfolio chatbot. Users visit the Streamlit UI, ask questions abo
 - **Vector store**: FAISS index stored at `faiss_index/` (tracked via git LFS)
 - **Deployment**: Single Docker container on HuggingFace Spaces (Docker SDK, port 8501)
 - **Package manager**: `pip` / `requirements.txt` (also has `pyproject.toml` + `uv.lock` for uv)
-- **Remotes**: `github` → GitHub, `space` → HuggingFace Spaces (legacy, may be unused)
+- **CI/CD**: GitHub Actions auto-syncs to HuggingFace Spaces on every push to `main`
+- **Remotes**: `github` → GitHub (primary), `space` → HuggingFace Spaces (legacy, superseded by Actions)
 
 ## Key Files
 
@@ -36,6 +37,7 @@ A RAG-powered portfolio chatbot. Users visit the Streamlit UI, ask questions abo
 | `data/Hargurjeet_Lead_GenAI_Specialist.pdf` | Resume PDF served for download in UI |
 | `data/my_avatar.png` | Avatar shown in the topbar |
 | `faiss_index/` | Pre-built FAISS index (`index.faiss` + `index.pkl`) — git LFS, included in Docker |
+| `.github/workflows/sync-to-hf.yml` | GitHub Action — syncs to HF Spaces on every push to `main` via `huggingface_hub.upload_folder()` |
 
 ### Dead code — do not touch or treat as active
 
@@ -87,8 +89,8 @@ curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"question": "What is his GenAI experience?", "chat_history": []}'
 
-# Deploy to HuggingFace Spaces (push to the space remote)
-git push space main
+# Deploy — just push to GitHub; Actions auto-syncs to HF Spaces
+git push github main
 ```
 
 ## Environment Variables
@@ -133,8 +135,9 @@ Controlled by `hide_think_blocks=True` on the LLM instance.
 - Space: `Hargurjeet/portfolio-chatbot`
 - SDK: Docker (`sdk: docker` in README frontmatter)
 - Exposed port: `8501` (Streamlit) — only this port is accessible publicly; FastAPI on `8000` is internal-only
-- Deploy by pushing to the `space` git remote — HF Spaces rebuilds the Docker image automatically
-- `FIREWORKS_API_KEY` must be set as a Space secret (Settings → Variables and secrets)
+- **Deploy**: push to `github main` → GitHub Actions runs `.github/workflows/sync-to-hf.yml` → uploads to HF Spaces automatically (tested, working)
+- GitHub secret required: `HF_TOKEN` (set in repo Settings → Secrets → Actions)
+- HF Spaces secret required: `FIREWORKS_API_KEY` (set in Space Settings → Variables and secrets)
 - HF Spaces does not guarantee always-on; Streamlit's `/health` polling loop handles cold-start gracefully
 
 ## Known Issues / Security Notes
