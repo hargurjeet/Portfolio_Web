@@ -1,0 +1,47 @@
+name: Sync to Hugging Face Spaces
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync-to-hf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Install huggingface_hub
+        run: pip install huggingface_hub
+
+      - name: Upload files to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'EOF'
+          import os
+          from huggingface_hub import HfApi
+
+          api = HfApi(token=os.environ["HF_TOKEN"])
+
+          api.upload_folder(
+              folder_path=".",
+              repo_id="Hargurjeet/portfolio-chatbot",
+              repo_type="space",
+              ignore_patterns=[
+                  ".git/*",
+                  ".github/*",
+                  ".venv/*",
+                  "__pycache__/*",
+                  "**/__pycache__/*",
+                  "*.pyc",
+                  ".env",
+                  ".DS_Store",
+              ],
+          )
+          print("Sync complete.")
+          EOF
