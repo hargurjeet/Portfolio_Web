@@ -34,7 +34,7 @@ A RAG-powered portfolio chatbot. Users visit the Streamlit UI, ask questions abo
 | `start.sh` | Launches FastAPI + Streamlit in parallel; `wait -n; wait` keeps container alive |
 | `Dockerfile` | Python 3.10-slim; pre-downloads embedding model into image layer |
 | `data/Hargurjeet_Singh_Ganger_KnowledgeBase.pdf` | Source document for FAISS index |
-| `data/Hargurjeet_Lead_GenAI_Specialist.pdf` | Resume PDF served for download in UI |
+| `data/Hargurjeet _Agenti_AI_Specialist_2026.pdf` | Resume PDF served for download in UI |
 | `data/my_avatar.png` | Avatar shown in the topbar |
 | `faiss_index/` | Pre-built FAISS index (`index.faiss` + `index.pkl`) — git LFS, included in Docker |
 | `.github/workflows/sync-to-hf.yml` | GitHub Action — syncs to HF Spaces on every push to `main` via `huggingface_hub.upload_folder()` |

@@ -6,7 +6,7 @@ import os
 import time
 
 API_URL = os.getenv("API_URL", "http://localhost:8000/api/v1/chat")
-RESUME_PATH = "data/Hargurjeet_Singh_Ganger_KnowledgeBase.pdf"
+RESUME_PATH = "data/Hargurjeet _Agenti_AI_Specialist_2026.pdf"
 AVATAR_PATH = "data/my_avatar.png"
 
 st.set_page_config(
@@ -867,7 +867,7 @@ with resume_tab:
         st.download_button(
             label="⬇️  Download Resume",
             data=pdf_bytes,
-            file_name="Hargurjeet_Lead_GenAI_Specialist.pdf",
+            file_name="Hargurjeet_Agentic_AI_Specialist_2026.pdf",
             mime="application/pdf"
         )
 
