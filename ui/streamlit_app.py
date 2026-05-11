@@ -990,7 +990,7 @@ with projects_tab:
                 "Python"
             ],
             "github_url": "https://github.com/hargurjeet/hybrid-rag",  # update if needed
-            "live_url": "https://huggingface.co/spaces/Hargurjeet/hybrid_rag_hf",  # update this
+            "live_url": "https://huggingface.co/spaces/Hargurjeet/hybrid-rag-nextjs",
             "status": "Live",
         },
         {
